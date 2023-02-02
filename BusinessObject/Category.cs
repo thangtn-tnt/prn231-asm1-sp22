@@ -13,7 +13,6 @@ namespace BusinessObject
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int CategoryId { get; set; }
-        [DisplayName("Category")]
         public string CategoryName { get; set; }
     }
 }

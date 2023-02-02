@@ -13,14 +13,10 @@ namespace BusinessObject
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ProductId { get; set; }     
-        [DisplayName("Category Id")]
         public int CategoryId { get; set; }
-        [DisplayName("Product")]
         public string ProductName { get; set; }        
         public double Weight { get; set; }
-        [DisplayName("Unit Price")]
         public int UnitPrice { get; set; }
-        [DisplayName("Units In Stock")]
         public int UnitsInStock { get; set; }        
         public Category? Category { get; set; }
     }

@@ -18,7 +18,7 @@ namespace BusinessObject
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
             IConfigurationRoot configuration = builder.Build();
-            optionsBuilder.UseSqlServer(configuration.GetConnectionString("eStore"));
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("eStore"));            
         }
 
         public virtual DbSet<Product> Products { get; set; }

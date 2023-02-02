@@ -1,8 +1,11 @@
 ﻿using BusinessObject;
+using DataAccess.Dto;
 using DataAccess.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace eStoreAPI.Controllers
 {
@@ -19,13 +22,25 @@ namespace eStoreAPI.Controllers
         [HttpGet("{id}")]
         public ActionResult<Member> FindById([FromRoute] int id) => _repository.GetMemberById(id);
 
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
+        {
+            var loginResponse = await _repository.Login(model);
+            if (loginResponse.Member == null || string.IsNullOrEmpty(loginResponse.Token))
+            {
+                //_response.StatusCode = HttpStatusCode.BadRequest;
+                //_response.IsSuccess = false;
+                //_response.ErrorMessages.Add("Username or password is incorrect");
+                return BadRequest();
+            }            
+            return Ok(loginResponse);
+        }
+
         //POST: MemberController/Member
         [HttpPost]
         public IActionResult SaveMember(Member mem)
         {
-            Member email = _repository.GetMemberByEmail(mem.Email);
-
-            if (email != null)
+            if (_repository.IsUniqueMember(mem.Email))
             {
                 return BadRequest();
             }

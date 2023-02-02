@@ -1,15 +1,44 @@
-﻿using BusinessObject;
+﻿using AutoMapper;
+using BusinessObject;
+using DataAccess.Dto;
+using DataAccess.DTO;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DataAccess.DAO
 {
     public class MemberDAO
     {
+        private static string secretKey;
+        private static IMapper _mapper;
+
+        public static string SecretKey
+        {
+            get
+            {
+                var builder = new ConfigurationBuilder()
+                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                IConfiguration config = builder.Build();
+                secretKey = config.GetSection("ApiSettings")["Secret"];
+                return secretKey;
+            }
+        }
+
+        public MemberDAO(IMapper mapper)
+        {
+            _mapper = mapper;
+        }
+
         public static List<Member> GetMembers()
         {
             var listMembers = new List<Member>();
@@ -43,7 +72,55 @@ namespace DataAccess.DAO
             }
             return member;
         }
-        public static Member FindByEmail(string email)
+        public static async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequest)
+        {            
+            try
+            {
+                using (var context = new ApplicationDbContext())
+                {
+                    var member = context.Members.SingleOrDefault(m => m.Email.ToLower() == loginRequest.Email);
+
+                    bool isValid = member.Password.Equals(loginRequest.Password) ? true : false;
+
+                    if (member == null || !isValid)
+                    {
+                        return new LoginResponseDTO()
+                        {
+                            Token = "",
+                            Member = null
+                        };
+                    }
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var key = Encoding.ASCII.GetBytes(SecretKey);
+
+                    var tokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new System.Security.Claims.ClaimsIdentity(new Claim[]
+                        {
+                        new Claim(ClaimTypes.Name, member.Email.ToString())
+                        }),
+                        Expires = DateTime.UtcNow.AddHours(1),
+                        SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                    };
+
+                    var token = tokenHandler.CreateToken(tokenDescriptor);
+
+                    LoginResponseDTO loginResponse = new LoginResponseDTO()
+                    {
+                        Token = tokenHandler.WriteToken(token),
+                        Member = member
+                    };
+
+                    return loginResponse;
+                }               
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+        }
+        public static bool FindByEmail(string email)
         {
             Member member = new Member();
             try
@@ -57,7 +134,13 @@ namespace DataAccess.DAO
             {
                 throw new Exception(e.Message);
             }
-            return member;
+
+            if (member is not null)
+            {
+                return true;
+            }
+
+            return false;
         }
         public static void SaveMember(Member member)
         {
