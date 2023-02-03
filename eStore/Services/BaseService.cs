@@ -13,6 +13,7 @@ namespace eStore.Services
     {
         public APIResponse APIResponse { get; set; }
         public IHttpClientFactory HttpClient { get; set; }
+
         public BaseService(IHttpClientFactory httpClient)
         {
             APIResponse = new();
