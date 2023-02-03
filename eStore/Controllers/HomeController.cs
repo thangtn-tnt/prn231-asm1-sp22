@@ -1,5 +1,6 @@
-﻿using BusinessObject;
+﻿using AutoMapper;
 using eStore.Models;
+using eStore.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -15,12 +16,14 @@ namespace eStore.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IMapper _mapper;
         private readonly ILogger<HomeController> _logger;
         private readonly HttpClient client = null;
         private string ProductApiUrl = string.Empty;
         private readonly JsonSerializerOptions options;
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IMapper mapper)
         {
+            _mapper = mapper;
             _logger = logger;
 
             client = new HttpClient();
@@ -34,13 +37,18 @@ namespace eStore.Controllers
             };
         }
 
-        public async Task<IActionResult> IndexAsync()
+        public async Task<IActionResult> Index()
         {
-            HttpResponseMessage response = await client.GetAsync(ProductApiUrl);
+            List<ProductDTO> listProducts = new List<ProductDTO>();
 
-            string strData = await response.Content.ReadAsStringAsync();
+            var response = await client.GetAsync(ProductApiUrl);
 
-            List<Product> listProducts = !string.IsNullOrEmpty(strData) ? JsonSerializer.Deserialize<List<Product>>(strData, options) : null;
+            if (response != null)
+            {
+                string strData = await response.Content.ReadAsStringAsync();
+
+                listProducts = !string.IsNullOrEmpty(strData) ? JsonSerializer.Deserialize<List<ProductDTO>>(strData, options) : null;
+            }
 
             return View(listProducts);
         }

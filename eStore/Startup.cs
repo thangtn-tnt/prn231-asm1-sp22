@@ -31,6 +31,8 @@ namespace eStore
                 o.Cookie.HttpOnly = true;
                 o.Cookie.IsEssential = true;
             });
+
+            services.AddAutoMapper(typeof(MappingConfig));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

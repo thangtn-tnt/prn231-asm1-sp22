@@ -1,4 +1,5 @@
 ﻿using BusinessObject;
+using DataAccess.Dto;
 using DataAccess.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ namespace eStoreAPI.Controllers
 
         //GET: apii/Product
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> GetProducts() => _repository.GetProducts();
+        public ActionResult<IEnumerable<ProductDTO>> GetProducts() => _repository.GetProducts();
 
         [HttpGet("{id}")]
         public ActionResult<Product> FindById([FromRoute] int id) => _repository.GetProductById(id);

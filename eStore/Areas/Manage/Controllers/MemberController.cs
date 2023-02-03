@@ -39,7 +39,7 @@ namespace eStore.Areas.Manage.Controllers
             return View(listMembers);
         }
 
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Add()
         {
             HttpResponseMessage response = await client.GetAsync(MemberUrlApi);
 

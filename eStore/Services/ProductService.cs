@@ -1,6 +1,6 @@
 ﻿namespace eStore.Services
 {
-    public class ProductService
+    public class ProductService : IProductService
     {
     }
 }

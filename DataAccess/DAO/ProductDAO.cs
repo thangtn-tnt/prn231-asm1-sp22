@@ -1,4 +1,6 @@
-﻿using BusinessObject;
+﻿using AutoMapper;
+using BusinessObject;
+using DataAccess.Dto;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,14 +12,34 @@ namespace DataAccess.DAO
 {
     public class ProductDAO
     {
-        public static List<Product> GetProducts()
+        private static IMapper _mapper;
+        public static IMapper Mapper
         {
-            var listProducts = new List<Product>();
+            get
+            {
+                if (_mapper == null)
+                {
+                    var config = new MapperConfiguration(cfg =>
+                    {
+                        cfg.CreateMap<Product, ProductDTO>()
+                        .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName));
+                        // Add any additional mappings here
+                    });
+
+                    _mapper = config.CreateMapper();
+                }
+
+                return _mapper;
+            }
+        }
+        public static List<ProductDTO> GetProducts()
+        {
+            var listProducts = new List<ProductDTO>();
             try
             {
                 using (var context = new ApplicationDbContext())
                 {
-                    listProducts = context.Products.Include("Category").ToList();
+                    listProducts = Mapper.Map<List<ProductDTO>>(context.Products.Include("Category").ToList());
                 }
             }
             catch (Exception e)

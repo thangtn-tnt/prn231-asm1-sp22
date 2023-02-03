@@ -1,5 +1,4 @@
 ﻿using BusinessObject;
-using DataAccess.Repositories;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,8 +7,7 @@ using System.Threading.Tasks;
 namespace eStore.Controllers
 {
     public class AuthController : Controller
-    {
-        private readonly IMemberRepository _repository = new MemberRepository();        
+    {        
         public IActionResult Index()
         {
             return View();
