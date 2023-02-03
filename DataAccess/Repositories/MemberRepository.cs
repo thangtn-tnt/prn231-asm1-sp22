@@ -13,7 +13,7 @@ namespace DataAccess.Repositories
 {
     public class MemberRepository : IMemberRepository
     {
-        public bool IsUniqueMember(string email) => MemberDAO.FindByEmail(email);
+        public bool IsUniqueMember(string email) => MemberDAO.FindByEmail(email) is null ? true : false;
         public void SaveMember(Member member) => MemberDAO.SaveMember(member);
         public void DeleteMember(Member member) => MemberDAO.DeleteMember(member);
         public void UpdateMember(Member member) => MemberDAO.UpdateMember(member);

@@ -3,8 +3,10 @@ using BusinessObject;
 using DataAccess.Dto;
 using DataAccess.DTO;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -28,6 +30,8 @@ namespace DataAccess.DAO
                     var config = new MapperConfiguration(cfg =>
                     {
                         cfg.CreateMap<Member, MemberDTO>().ReverseMap();
+                        cfg.CreateMap<Member, RegisterationRequestDTO>().ReverseMap();
+                        cfg.CreateMap<MemberDTO, LoginRequestDTO>().ReverseMap();
                         // Add any additional mappings here
                     });
 
@@ -36,10 +40,6 @@ namespace DataAccess.DAO
 
                 return _mapper;
             }
-        }
-        public MemberDAO(IMapper mapper)
-        {
-            _mapper = mapper;
         }
         public static List<Member> GetMembers()
         {
@@ -76,92 +76,102 @@ namespace DataAccess.DAO
         }
         public static async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequest)
         {
+            if (!IsValidLogin(loginRequest))
+            {
+                return new LoginResponseDTO()
+                {
+                    Token = "",
+                    Member = null
+                };
+            }
+            else
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(SD.SecretKey);
+
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new System.Security.Claims.ClaimsIdentity(new Claim[]
+                    {
+                        new Claim(ClaimTypes.Email, loginRequest.Email.ToString())
+                    }),
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+
+                return new LoginResponseDTO()
+                {
+                    Token = tokenHandler.WriteToken(token),
+                    Member = Mapper.Map<MemberDTO>(loginRequest)
+                };
+            }
+        }
+        public static bool IsValidLogin(LoginRequestDTO loginRequest)
+        {
             try
             {
+                if (IsAdmin(loginRequest))
+                {
+                    return loginRequest.Password.Equals(SD.DefaultAccount.Password);
+                }
+
                 using (var context = new ApplicationDbContext())
                 {
-                    var member = await context.Members.SingleOrDefaultAsync(m => m.Email.ToLower() == loginRequest.Email);
+                    var member = FindByEmail(loginRequest.Email);
 
-                    bool isValid = member is null || !member.Password.Equals(loginRequest.Password) ? false : true;
-
-                    if (!isValid)
-                    {
-                        return new LoginResponseDTO()
-                        {
-                            Token = "",
-                            Member = null
-                        };
-                    }
-                    var tokenHandler = new JwtSecurityTokenHandler();
-                    var key = Encoding.ASCII.GetBytes(SD.SecretKey);
-
-                    var tokenDescriptor = new SecurityTokenDescriptor
-                    {
-                        Subject = new System.Security.Claims.ClaimsIdentity(new Claim[]
-                        {
-                        new Claim(ClaimTypes.Name, member.Email.ToString())
-                        }),
-                        Expires = DateTime.UtcNow.AddHours(1),
-                        SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                    };
-
-                    var token = tokenHandler.CreateToken(tokenDescriptor);
-
-                    LoginResponseDTO loginResponse = new LoginResponseDTO()
-                    {
-                        Token = tokenHandler.WriteToken(token),
-                        Member = Mapper.Map<MemberDTO>(member)
-                    };
-
-                    return loginResponse;
+                    return member is null || !member.Password.Equals(loginRequest.Password) ? false : true;
                 }
             }
             catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
+        public static bool IsAdmin(LoginRequestDTO loginRequest) => SD.DefaultAccount.Email.ToLower() == loginRequest.Email.ToLower();
         public static async Task<MemberDTO> Register(RegisterationRequestDTO registerRequest)
         {
-
-            Member member = new()
+            if (FindByEmail(registerRequest.Email) == null)
             {
-                Email = registerRequest.Email,
-                CompanyName = registerRequest.CompanyName,
-                Country = registerRequest.Country,
-                City = registerRequest.City,
-                Password = registerRequest.Password,
-            };
+                Member member = Mapper.Map<Member>(registerRequest);                
 
-            try
-            {
-                using (var context = new ApplicationDbContext())
+                try
                 {
-                    await context.Members.AddAsync(member);
-
-                    int result = await context.SaveChangesAsync();
-
-                    if (result > 0)
+                    using (var context = new ApplicationDbContext())
                     {
-                        var memberToReturn = context.Members.FirstOrDefault(u => u.Email == registerRequest.Email);
-                        return Mapper.Map<MemberDTO>(memberToReturn);
+                        await context.Members.AddAsync(member);
+
+                        int result = await context.SaveChangesAsync();
+
+                        if (result > 0)
+                        {
+                            var memberToReturn = context.Members.FirstOrDefault(u => u.Email == registerRequest.Email);
+                            return Mapper.Map<MemberDTO>(memberToReturn);
+                        }
                     }
                 }
+                catch (Exception e)
+                {
+                    throw new Exception(e.Message);
+                }
             }
-            catch (Exception e)
-            {
-
-            }
+            
             return new MemberDTO();
         }
-        public static bool FindByEmail(string email)
+        public static Member FindByEmail(string email)
         {
+            if (email.ToLower() == SD.DefaultAccount.Email.ToLower())
+            {
+                return new Member { Email = email, Password = SD.DefaultAccount.Password };
+            }
+
             Member member = new Member();
             try
             {
                 using (var context = new ApplicationDbContext())
                 {
-                    member = context.Members.SingleOrDefault(x => x.Email == email);
+                    member = context.Members.SingleOrDefault(x => x.Email.ToLower() == email.ToLower());
                 }
             }
             catch (Exception e)
@@ -169,12 +179,7 @@ namespace DataAccess.DAO
                 throw new Exception(e.Message);
             }
 
-            if (member is not null)
-            {
-                return false;
-            }
-
-            return true;
+            return member;
         }
         public static void SaveMember(Member member)
         {
