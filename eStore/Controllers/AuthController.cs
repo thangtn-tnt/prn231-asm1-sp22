@@ -9,11 +9,7 @@ namespace eStore.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly IMemberRepository _repository;
-        public AuthController()
-        {
-            _repository = new MemberRepository();
-        }
+        private readonly IMemberRepository _repository = new MemberRepository();        
         public IActionResult Index()
         {
             return View();

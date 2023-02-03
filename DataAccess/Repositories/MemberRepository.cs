@@ -1,6 +1,8 @@
-﻿using BusinessObject;
+﻿using AutoMapper;
+using BusinessObject;
 using DataAccess.DAO;
 using DataAccess.Dto;
+using DataAccess.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +20,6 @@ namespace DataAccess.Repositories
         public Member GetMemberById(int id) => MemberDAO.FindById(id);
         public List<Member> GetMembers() => MemberDAO.GetMembers();
         public Task<LoginResponseDTO> Login(LoginRequestDTO loginRequest) => MemberDAO.Login(loginRequest);
-        public Task<RegisterationRequestDTO> Register(RegisterationRequestDTO registerationRequest)
-        {
-            throw new Exception();
-        }
+        public Task<MemberDTO> Register(RegisterationRequestDTO registerationRequest) => MemberDAO.Register(registerationRequest);
     }
 }

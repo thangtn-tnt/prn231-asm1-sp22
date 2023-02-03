@@ -36,6 +36,24 @@ namespace eStoreAPI.Controllers
             return Ok(loginResponse);
         }
 
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register([FromBody] RegisterationRequestDTO model)
+        {
+            bool isUnique = _repository.IsUniqueMember(model.Email);
+            if (!isUnique)
+            {           
+                return BadRequest("not available");
+            }
+
+            var user = await _repository.Register(model);
+            if (user == null)
+            {
+                return BadRequest("failed");
+            }
+           
+            return Ok();
+        }
+
         //POST: MemberController/Member
         [HttpPost]
         public IActionResult SaveMember(Member mem)

@@ -1,5 +1,7 @@
-﻿using BusinessObject;
+﻿using AutoMapper;
+using BusinessObject;
 using DataAccess.Dto;
+using DataAccess.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +17,7 @@ namespace DataAccess.Repositories
         void DeleteMember(Member member);
         void UpdateMember(Member member);
         Task<LoginResponseDTO> Login(LoginRequestDTO loginRequest);
-        Task<RegisterationRequestDTO> Register(RegisterationRequestDTO registerationRequest);
+        Task<MemberDTO> Register(RegisterationRequestDTO registerationRequest);
         Member GetMemberById(int id);
         List<Member> GetMembers();
     }

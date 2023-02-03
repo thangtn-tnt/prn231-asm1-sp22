@@ -18,27 +18,29 @@ namespace DataAccess.DAO
 {
     public class MemberDAO
     {
-        private static string secretKey;
         private static IMapper _mapper;
-
-        public static string SecretKey
+        public static IMapper Mapper
         {
             get
             {
-                var builder = new ConfigurationBuilder()
-                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                IConfiguration config = builder.Build();
-                secretKey = config.GetSection("ApiSettings")["Secret"];
-                return secretKey;
+                if (_mapper == null)
+                {
+                    var config = new MapperConfiguration(cfg =>
+                    {
+                        cfg.CreateMap<Member, MemberDTO>().ReverseMap();
+                        // Add any additional mappings here
+                    });
+
+                    _mapper = config.CreateMapper();
+                }
+
+                return _mapper;
             }
         }
-
         public MemberDAO(IMapper mapper)
         {
             _mapper = mapper;
         }
-
         public static List<Member> GetMembers()
         {
             var listMembers = new List<Member>();
@@ -73,16 +75,16 @@ namespace DataAccess.DAO
             return member;
         }
         public static async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequest)
-        {            
+        {
             try
             {
                 using (var context = new ApplicationDbContext())
                 {
-                    var member = context.Members.SingleOrDefault(m => m.Email.ToLower() == loginRequest.Email);
+                    var member = await context.Members.SingleOrDefaultAsync(m => m.Email.ToLower() == loginRequest.Email);
 
-                    bool isValid = member.Password.Equals(loginRequest.Password) ? true : false;
+                    bool isValid = member is null || !member.Password.Equals(loginRequest.Password) ? false : true;
 
-                    if (member == null || !isValid)
+                    if (!isValid)
                     {
                         return new LoginResponseDTO()
                         {
@@ -91,7 +93,7 @@ namespace DataAccess.DAO
                         };
                     }
                     var tokenHandler = new JwtSecurityTokenHandler();
-                    var key = Encoding.ASCII.GetBytes(SecretKey);
+                    var key = Encoding.ASCII.GetBytes(SD.SecretKey);
 
                     var tokenDescriptor = new SecurityTokenDescriptor
                     {
@@ -108,17 +110,49 @@ namespace DataAccess.DAO
                     LoginResponseDTO loginResponse = new LoginResponseDTO()
                     {
                         Token = tokenHandler.WriteToken(token),
-                        Member = member
+                        Member = Mapper.Map<MemberDTO>(member)
                     };
 
                     return loginResponse;
-                }               
+                }
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+        }
+        public static async Task<MemberDTO> Register(RegisterationRequestDTO registerRequest)
+        {
+
+            Member member = new()
+            {
+                Email = registerRequest.Email,
+                CompanyName = registerRequest.CompanyName,
+                Country = registerRequest.Country,
+                City = registerRequest.City,
+                Password = registerRequest.Password,
+            };
+
+            try
+            {
+                using (var context = new ApplicationDbContext())
+                {
+                    await context.Members.AddAsync(member);
+
+                    int result = await context.SaveChangesAsync();
+
+                    if (result > 0)
+                    {
+                        var memberToReturn = context.Members.FirstOrDefault(u => u.Email == registerRequest.Email);
+                        return Mapper.Map<MemberDTO>(memberToReturn);
+                    }
+                }
             }
             catch (Exception e)
             {
 
-                throw;
             }
+            return new MemberDTO();
         }
         public static bool FindByEmail(string email)
         {
@@ -137,10 +171,10 @@ namespace DataAccess.DAO
 
             if (member is not null)
             {
-                return true;
+                return false;
             }
 
-            return false;
+            return true;
         }
         public static void SaveMember(Member member)
         {
