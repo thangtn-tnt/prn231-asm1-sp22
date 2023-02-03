@@ -54,8 +54,8 @@ namespace eStoreAPI.Controllers
             return Ok();
         }
 
-        //POST: MemberController/Member
-        [HttpPost]
+        //POST: api/Member
+        [HttpPut]
         public IActionResult SaveMember(Member mem)
         {
             if (_repository.IsUniqueMember(mem.Email))
