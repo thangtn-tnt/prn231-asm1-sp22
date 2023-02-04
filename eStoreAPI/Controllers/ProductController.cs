@@ -1,12 +1,15 @@
-﻿using BusinessObject;
+﻿using AutoMapper;
+using BusinessObject;
 using DataAccess.Dto;
 using DataAccess.Repositories;
 using eStoreAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -24,14 +27,19 @@ namespace eStoreAPI.Controllers
             _response = new();
         }
 
-
-        //GET: apii/Product
         [HttpGet]
-        public ActionResult<APIResponse> GetProducts()
+        public ActionResult<APIResponse> GetProducts([FromQuery] string? search)
         {
             try
             {
-                IEnumerable<ProductDTO> productList = _repository.GetProducts();
+                IEnumerable<ProductDTO> productList;
+
+                productList = _repository.GetProducts();
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    productList = productList.Where(u => u.ProductName.ToLower().Contains(search));
+                }
 
                 _response.Result = productList;
                 _response.StatusCode = HttpStatusCode.OK;
@@ -46,52 +54,83 @@ namespace eStoreAPI.Controllers
             return _response;
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<Product> FindById([FromRoute] int id) => _repository.GetProductById(id);
-
-        //POST: api/Product
-        [HttpPost]
-        public IActionResult PostProduct(Product product)
-        {
-            _repository.SaveProduct(product);
-            return NoContent();
-        }
-
         [HttpGet("Categories")]
-        public ActionResult<IEnumerable<Category>> GetCategories() => _repository.GetCategories();
-
-        //GET: api/Product/5
-        [HttpDelete("id")]
-        public IActionResult DeleteProduct(int id)
+        public ActionResult<APIResponse> GetCategories()
         {
-            var prodFromDb = _repository.GetProductById(id);
-
-            if (prodFromDb == null)
+            try
             {
-                return NotFound();
-            }
+                IEnumerable<CategoryDTO> categories;
 
-            _repository.DeleteProduct(prodFromDb);
-            return NoContent();
+                categories = _repository.GetCategories();
+
+                _response.Result = categories;
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorMessages
+                     = new List<string>() { ex.ToString() };
+            }
+            return _response;
         }
 
-        [HttpPut("id")]
-        public IActionResult UpdateProduct(int id, Product product)
+        [HttpGet("{id:int}")]
+        public ActionResult<APIResponse> GetProduct([FromRoute] int id)
         {
-            if (id != product.ProductId)
+            try
             {
-                return BadRequest();
+                if (id == 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                var product = _repository.GetProductById(id);
+                if (product == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+                _response.Result = product;
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
             }
-
-            var prodFromDb = _repository.GetProductById(id);
-
-            if (prodFromDb == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                _response.IsSuccess = false;
+                _response.ErrorMessages
+                     = new List<string>() { ex.ToString() };
             }
+            return _response;
+        }
+        [HttpPost]
+        public ActionResult<APIResponse> Create([FromBody] ProductCreateDTO createDTO)
+        {
+            try
+            {
+                if (createDTO == null)
+                {
+                    return BadRequest(createDTO);
+                }
 
-            _repository.UpdateProduct(product);
-            return NoContent();
+                ProductDTO model = new()
+                {
+                    ProductName = createDTO.ProductName,                    
+                };
+
+                _repository.SaveProduct(createDTO);
+                _response.Result = createDTO;
+                _response.StatusCode = HttpStatusCode.Created;                
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorMessages
+                     = new List<string>() { ex.ToString() };
+            }
+            return _response;
         }
     }
 }

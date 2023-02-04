@@ -22,7 +22,9 @@ namespace DataAccess.DAO
                     var config = new MapperConfiguration(cfg =>
                     {
                         cfg.CreateMap<Product, ProductDTO>()
-                        .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName));
+                        .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName)).ReverseMap();
+                        cfg.CreateMap<Product, ProductCreateDTO>().ReverseMap();
+                        cfg.CreateMap<Category, CategoryDTO>().ReverseMap();
                         // Add any additional mappings here
                     });
 
@@ -48,15 +50,14 @@ namespace DataAccess.DAO
             }
             return listProducts;
         }
-
-        public static List<Category> GetCategories()
+        public static List<CategoryDTO> GetCategories()
         {
-            var listCate = new List<Category>();
+            var listCate = new List<CategoryDTO>();
             try
             {
                 using (var context = new ApplicationDbContext())
                 {
-                    listCate = context.Categories.ToList();
+                    listCate = Mapper.Map<List<CategoryDTO>>(context.Categories.ToList());
                 }
             }
             catch (Exception e)
@@ -65,15 +66,14 @@ namespace DataAccess.DAO
             }
             return listCate;
         }
-
-        public static Product FindById(int prodId)
+        public static ProductDTO FindById(int prodId)
         {
-            Product product = new Product();
+            ProductDTO product = new ProductDTO();
             try
             {
                 using (var context = new ApplicationDbContext())
                 {
-                    product = context.Products.Include("Category").SingleOrDefault(x => x.ProductId == prodId);
+                    product = Mapper.Map<ProductDTO>(context.Products.Include("Category").SingleOrDefault(x => x.ProductId == prodId));
                 }
             }
             catch (Exception e)
@@ -82,14 +82,15 @@ namespace DataAccess.DAO
             }
             return product;
         }
-        public static void SaveProduct(Product product)
+        public static void SaveProduct(ProductCreateDTO create)
         {
             try
             {
                 using (var context = new ApplicationDbContext())
                 {
+                    Product product = Mapper.Map<Product>(create);
                     context.Products.Add(product);
-                    context.SaveChanges();
+                    context.SaveChanges();                    
                 }
             }
             catch (Exception e)
@@ -97,6 +98,25 @@ namespace DataAccess.DAO
                 throw new Exception(e.Message);
             }
         }
+
+        public static ProductDTO FindByName(string name)
+        {
+            ProductDTO member = new ProductDTO();
+            try
+            {
+                using (var context = new ApplicationDbContext())
+                {
+                    member = _mapper.Map<ProductDTO>(context.Products.Where(u => u.ProductName.ToLower() == name));
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+
+            return member;
+        }
+
         public static void UpdateProduct(Product product)
         {
             try

@@ -12,15 +12,10 @@ namespace eStore.Models.Dto
     public class ProductDTO
     {
         public int ProductId { get; set; }
-        [Required]
         public string ProductName { get; set; }
-        [Required]
         public double Weight { get; set; }
-        [Required]
         public int UnitPrice { get; set; }
-        [Required]
         public int UnitsInStock { get; set; }
-        [Required]
         public string CategoryName { get; set; }
     }
 }

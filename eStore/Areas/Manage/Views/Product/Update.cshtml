@@ -23,7 +23,7 @@
                 <label asp-for="Category.CategoryName" class="control-label pt-2" style="font-size:20px;"></label>
             </div>
             <div class="col-10 pb-3">
-                <select asp-for="Category.CategoryName" asp-items="ViewBag.CategoryId" class="form-control"></select>
+                <select asp-for="Category.CategoryName" asp-items="ViewBag.CategoryName" class="form-control"></select>
                 <span asp-validation-for="Category.CategoryName" class="text-danger"></span>
             </div>
 

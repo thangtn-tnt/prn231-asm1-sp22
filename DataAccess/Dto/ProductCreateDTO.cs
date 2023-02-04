@@ -20,6 +20,6 @@ namespace DataAccess.Dto
         [Required]
         public int UnitsInStock { get; set; }
         [Required]
-        public string CategoryName { get; set; }
+        public int CategoryId { get; set; }
     }
 }

@@ -11,11 +11,11 @@ namespace DataAccess.Repositories
 {
     public class ProductRepository : IProductRepository
     {
-        public void SaveProduct(Product product) => ProductDAO.SaveProduct(product);
-        public Product GetProductById(int id) => ProductDAO.FindById(id);
+        public void SaveProduct(ProductCreateDTO product) => ProductDAO.SaveProduct(product);
+        public ProductDTO GetProductById(int id) => ProductDAO.FindById(id);
         public void DeleteProduct(Product product) => ProductDAO.DeleteProduct(product);
         public void UpdateProduct(Product product) => ProductDAO.UpdateProduct(product);
-        public List<Category> GetCategories() => ProductDAO.GetCategories();
+        public List<CategoryDTO> GetCategories() => ProductDAO.GetCategories();
         public List<ProductDTO> GetProducts() => ProductDAO.GetProducts();
     }
 }
