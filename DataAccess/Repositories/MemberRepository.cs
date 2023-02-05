@@ -14,9 +14,9 @@ namespace DataAccess.Repositories
     public class MemberRepository : IMemberRepository
     {
         public bool IsUniqueMember(string email) => MemberDAO.FindByEmail(email) is null ? true : false;
-        public void SaveMember(Member member) => MemberDAO.SaveMember(member);
+        public void SaveMember(RegisterationRequestDTO member) => MemberDAO.SaveMember(member);
         public void DeleteMember(Member member) => MemberDAO.DeleteMember(member);
-        public void UpdateMember(Member member) => MemberDAO.UpdateMember(member);
+        public void UpdateMember(MemberUpdateDTO member) => MemberDAO.UpdateMember(member);
         public Member GetMemberById(int id) => MemberDAO.FindById(id);
         public List<MemberDTO> GetMembers() => MemberDAO.GetMembers();
         public Task<LoginResponseDTO> Login(LoginRequestDTO loginRequest) => MemberDAO.Login(loginRequest);

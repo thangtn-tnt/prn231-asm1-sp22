@@ -25,36 +25,34 @@ namespace eStore.Services
             });
         }
 
-        public Task<T> DeleteAsync<T>(int id, string token)
+        public Task<T> DeleteAsync<T>(int id)
         {
             return SendAsync<T>(new APIRequest()
             {
                 APIType = SD.APIType.DELETE,
                 Url = memberUrl + id,
-                Token = token
             });
         }
 
-        public Task<T> GetAllAsync<T>()
+        public Task<T> GetAllAsync<T>(string? search)
         {
             return SendAsync<T>(new APIRequest()
             {
                 APIType = SD.APIType.GET,
-                Url = memberUrl,
+                Url = memberUrl + "?search=" + search,
             });
         }
 
-        public Task<T> GetAsync<T>(int id, string token)
+        public Task<T> GetAsync<T>(int id)
         {
             return SendAsync<T>(new APIRequest()
             {
                 APIType = SD.APIType.GET,
                 Url = memberUrl + id,
-                Token = token
             });
         }
 
-        public Task<T> UpdateAsync<T>(MemberDTO dto)
+        public Task<T> UpdateAsync<T>(MemberEditDTO dto)
         {
             return SendAsync<T>(new APIRequest()
             {

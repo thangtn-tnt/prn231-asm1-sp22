@@ -1,61 +1,62 @@
 ﻿@{
     ViewData["Title"] = "Manage Member";
 }
-
-<br />
-<div class="container p-4 border">
-    <div class="row">
-        <div class="col text-right pb-2">
-            <a asp-controller="Member" asp-action="Add" class="btn btn-outline-primary"><i class="bi bi-plus-square-fill"></i> Add New Member</a>
-        </div>
-    </div>
-    <div class="row pb-2">
-        <div class="col">
-            <h1 class="text-primary">Member List</h1>
-        </div>
-        <div class="mx-auto col">
-            <div class="form-group has-search align-items-center">
-                <span class="fa fa-search form-control-feedback"></span>
-                <input type="text" class="form-control" placeholder="Search">
+<form method="get">
+    <br />
+    <div class="container p-4 border">
+        <div class="row">
+            <div class="col text-right pb-2">
+                <a asp-controller="Member" asp-action="Add" class="btn btn-outline-primary"><i class="bi bi-plus-square-fill"></i> Add New Member</a>
             </div>
         </div>
-    </div>
+        <div class="row pb-2">
+            <div class="col">
+                <h1 class="text-primary">Member List</h1>
+            </div>
+            <div class="mx-auto col">
+                <div class="form-group has-search align-items-center">
+                    <span class="fa fa-search form-control-feedback"></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search">
+                </div>
+            </div>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    Email
-                </th>
-                <th>
-                    Company Name
-                </th>
-                <th>
-                    City
-                </th>
-                <th>
-                    Country
-                </th>
-                <th>
-                    Action
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>@item.Email</td>
-                    <td>@item.CompanyName</td>
-                    <td>@item.City</td>
-                    <td>@item.Country</td>
-                    <td>
-                        <a asp-controller="Member" asp-action="Update" asp-route-id="@item.MemberId" class="btn btn-success"><i class="bi bi-pencil-square"></i></a>
-                        <a asp-controller="Member" asp-action="Delete" asp-route-id="@item.MemberId" class="btn btn-danger"><i class="bi bi-trash-fill"></i></a>
-                    </td>
+                    <th>
+                        Email
+                    </th>
+                    <th>
+                        Company Name
+                    </th>
+                    <th>
+                        City
+                    </th>
+                    <th>
+                        Country
+                    </th>
+                    <th>
+                        Action
+                    </th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Email</td>
+                        <td>@item.CompanyName</td>
+                        <td>@item.City</td>
+                        <td>@item.Country</td>
+                        <td>
+                            <a asp-controller="Member" asp-action="Edit" asp-route-id="@item.MemberId" class="btn btn-success"><i class="bi bi-pencil-square"></i></a>
+                            <a asp-controller="Member" asp-action="Delete" asp-route-id="@item.MemberId" class="btn btn-danger"><i class="bi bi-trash-fill"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
 
-</div>
+    </div>
+</form>

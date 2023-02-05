@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace eStore.Models.Dto
 {
-    public class MemberDTO
+    public class MemberEditDTO
     {
         public int MemberId { get; set; }
         [DataType(DataType.EmailAddress)]
@@ -15,5 +15,7 @@ namespace eStore.Models.Dto
         public string CompanyName { get; set; }
         public string City { get; set; }
         public string Country { get; set; }
+        [DataType(DataType.Password)] 
+        public string Password { get; set; }
     }
 }

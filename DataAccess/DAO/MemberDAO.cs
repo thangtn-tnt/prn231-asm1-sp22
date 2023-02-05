@@ -32,6 +32,7 @@ namespace DataAccess.DAO
                         cfg.CreateMap<Member, MemberDTO>().ReverseMap();
                         cfg.CreateMap<Member, RegisterationRequestDTO>().ReverseMap();
                         cfg.CreateMap<Member, LoginRequestDTO>().ReverseMap();
+                        cfg.CreateMap<Member, MemberUpdateDTO>().ReverseMap();
                         // Add any additional mappings here
                     });
 
@@ -181,13 +182,13 @@ namespace DataAccess.DAO
 
             return member;
         }
-        public static void SaveMember(Member member)
+        public static void SaveMember(RegisterationRequestDTO member)
         {
             try
             {
                 using (var context = new ApplicationDbContext())
                 {
-                    context.Members.Add(member);
+                    context.Members.Add(Mapper.Map<Member>(member));
                     context.SaveChanges();
                 }
             }
@@ -196,13 +197,18 @@ namespace DataAccess.DAO
                 throw new Exception(e.Message);
             }
         }
-        public static void UpdateMember(Member member)
+        public static void UpdateMember(MemberUpdateDTO member)
         {
             try
             {
                 using (var context = new ApplicationDbContext())
                 {
-                    context.Entry<Member>(member).State = EntityState.Modified;
+                    if (string.IsNullOrEmpty(member.Password))
+                    {
+                        member.Password = FindById(member.MemberId).Password;
+                    }
+
+                    context.Update(Mapper.Map<Member>(member));
                     context.SaveChanges();
                 }
             }
