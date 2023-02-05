@@ -23,46 +23,44 @@ namespace eStore.Services
             {
                 APIType = SD.APIType.POST,
                 Data = dto,
-                Url = productUrl                
+                Url = productUrl
             });
         }
 
-        public Task<T> DeleteAsync<T>(int id, string token)
+        public Task<T> DeleteAsync<T>(int id)
         {
             return SendAsync<T>(new APIRequest()
             {
                 APIType = SD.APIType.DELETE,
                 Url = productUrl + id,
-                Token = token
             });
         }
 
-        public Task<T> GetAllAsync<T>()
+        public Task<T> GetAllAsync<T>(string? productName)
         {
             return SendAsync<T>(new APIRequest()
             {
                 APIType = SD.APIType.GET,
-                Url = productUrl,
+                Url = string.IsNullOrEmpty(productName) ? productUrl : productUrl + "?search=" + productName,
             });
         }
 
-        public Task<T> GetAsync<T>(int id, string token)
+        public Task<T> GetAsync<T>(int id)
         {
             return SendAsync<T>(new APIRequest()
             {
                 APIType = SD.APIType.GET,
                 Url = productUrl + id,
-                Token = token
             });
         }
 
-        public Task<T> UpdateAsync<T>(ProductDTO dto)
+        public Task<T> UpdateAsync<T>(ProductUpdateDTO dto)
         {
             return SendAsync<T>(new APIRequest()
             {
                 APIType = SD.APIType.PUT,
                 Data = dto,
-                Url = productUrl + dto.ProductId,                
+                Url = productUrl + dto.ProductId,
             });
         }
 
@@ -70,7 +68,7 @@ namespace eStore.Services
         {
             return SendAsync<T>(new APIRequest()
             {
-                APIType = SD.APIType.GET,                
+                APIType = SD.APIType.GET,
                 Url = productUrl + "Categories"
             });
         }

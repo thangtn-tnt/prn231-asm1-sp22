@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.Execution;
 using BusinessObject;
 using DataAccess.Dto;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace DataAccess.DAO
 {
@@ -24,6 +26,7 @@ namespace DataAccess.DAO
                         cfg.CreateMap<Product, ProductDTO>()
                         .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName)).ReverseMap();
                         cfg.CreateMap<Product, ProductCreateDTO>().ReverseMap();
+                        cfg.CreateMap<Product, ProductUpdateDTO>().ReverseMap();
                         cfg.CreateMap<Category, CategoryDTO>().ReverseMap();
                         // Add any additional mappings here
                     });
@@ -90,7 +93,7 @@ namespace DataAccess.DAO
                 {
                     Product product = Mapper.Map<Product>(create);
                     context.Products.Add(product);
-                    context.SaveChanges();                    
+                    context.SaveChanges();
                 }
             }
             catch (Exception e)
@@ -106,7 +109,7 @@ namespace DataAccess.DAO
             {
                 using (var context = new ApplicationDbContext())
                 {
-                    member = _mapper.Map<ProductDTO>(context.Products.Where(u => u.ProductName.ToLower() == name));
+                    member = Mapper.Map<ProductDTO>(context.Products.Where(u => u.ProductName.ToLower() == name));
                 }
             }
             catch (Exception e)
@@ -117,13 +120,13 @@ namespace DataAccess.DAO
             return member;
         }
 
-        public static void UpdateProduct(Product product)
+        public static void UpdateProduct(ProductUpdateDTO product)
         {
             try
             {
                 using (var context = new ApplicationDbContext())
-                {
-                    context.Entry<Product>(product).State = EntityState.Modified;
+                {                    
+                    context.Update(Mapper.Map<Product>(product));
                     context.SaveChanges();
                 }
             }
@@ -132,7 +135,7 @@ namespace DataAccess.DAO
                 throw new Exception(e.Message);
             }
         }
-        public static void DeleteProduct(Product product)
+        public static void DeleteProduct(ProductDTO product)
         {
             try
             {

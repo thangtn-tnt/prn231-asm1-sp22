@@ -7,7 +7,10 @@ namespace eStore
     public class MappingConfig : Profile
     {
         public MappingConfig() { 
-            CreateMap<Product, ProductDTO>();
+            CreateMap<Product, ProductDTO>().ReverseMap();
+            CreateMap<Product, ProductUpdateDTO>().ReverseMap();
+            CreateMap<ProductDTO, ProductUpdateDTO>().ReverseMap();
+            CreateMap<Member, MemberDTO>().ReverseMap();
         }
     }
 }

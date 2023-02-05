@@ -18,7 +18,7 @@ namespace DataAccess.Repositories
         public void DeleteMember(Member member) => MemberDAO.DeleteMember(member);
         public void UpdateMember(Member member) => MemberDAO.UpdateMember(member);
         public Member GetMemberById(int id) => MemberDAO.FindById(id);
-        public List<Member> GetMembers() => MemberDAO.GetMembers();
+        public List<MemberDTO> GetMembers() => MemberDAO.GetMembers();
         public Task<LoginResponseDTO> Login(LoginRequestDTO loginRequest) => MemberDAO.Login(loginRequest);
         public Task<MemberDTO> Register(RegisterationRequestDTO registerationRequest) => MemberDAO.Register(registerationRequest);
     }

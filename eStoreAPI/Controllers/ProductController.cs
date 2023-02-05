@@ -38,7 +38,7 @@ namespace eStoreAPI.Controllers
 
                 if (!string.IsNullOrEmpty(search))
                 {
-                    productList = productList.Where(u => u.ProductName.ToLower().Contains(search));
+                    productList = productList.Where(u => u.ProductName.ToLower().Contains(search.ToLower()));
                 }
 
                 _response.Result = productList;
@@ -93,9 +93,8 @@ namespace eStoreAPI.Controllers
                     _response.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
-                _response.Result = product;
-                _response.StatusCode = HttpStatusCode.OK;
-                return Ok(_response);
+                _response.Result = JsonConvert.SerializeObject(product);
+                _response.StatusCode = HttpStatusCode.OK;                
             }
             catch (Exception ex)
             {
@@ -115,14 +114,60 @@ namespace eStoreAPI.Controllers
                     return BadRequest(createDTO);
                 }
 
-                ProductDTO model = new()
-                {
-                    ProductName = createDTO.ProductName,                    
-                };
-
                 _repository.SaveProduct(createDTO);
                 _response.Result = createDTO;
                 _response.StatusCode = HttpStatusCode.Created;                
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorMessages
+                     = new List<string>() { ex.ToString() };
+            }
+            return _response;
+        }
+
+        [HttpDelete("{id:int}")]
+        public ActionResult<APIResponse> Delete(int id)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    return BadRequest();
+                }
+                var product = _repository.GetProductById(id);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+                _repository.DeleteProduct(product);
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorMessages
+                     = new List<string>() { ex.ToString() };
+            }
+            return _response;
+        }
+
+        [HttpPut("{id:int}")]
+        public ActionResult<APIResponse> Update(int id, [FromBody] ProductUpdateDTO updateDTO)
+        {
+            try
+            {
+                if (updateDTO == null || id != updateDTO.ProductId)
+                {
+                    return BadRequest();
+                }
+
+                _repository.UpdateProduct(updateDTO);
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;                
             }
             catch (Exception ex)
             {

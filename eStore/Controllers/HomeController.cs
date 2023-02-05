@@ -25,18 +25,19 @@ namespace eStore.Controllers
             _service = service;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? search)
         {
             List<ProductDTO> listProducts = new List<ProductDTO>();
 
-            var response = await _service.GetAllAsync<APIResponse>();
+            var response = await _service.GetAllAsync<APIResponse>(search);
 
             if (response != null && response.IsSuccess)
             {
                 listProducts = JsonConvert.DeserializeObject<List<ProductDTO>>(Convert.ToString(response.Result));
             }
-
+            
             return View(listProducts);
+
         }
     }
 }

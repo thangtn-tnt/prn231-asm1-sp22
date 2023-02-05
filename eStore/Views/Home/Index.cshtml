@@ -9,7 +9,7 @@
     customFormat.CurrencySymbol = "VND";
 }
 
-<form>
+<form method="get">
     <div class="container p-4 border">
         <div class="row">
             <div class="col">
@@ -18,14 +18,14 @@
             <div class="mx-auto col">
                 <div class="form-group has-search align-items-center">
                     <span class="fa fa-search form-control-feedback"></span>
-                    <input type="text" class="form-control" placeholder="Search">
+                    <input type="text" name="search" class="form-control" placeholder="Search">
                 </div>
             </div>
         </div>
         <div class="row">
             @foreach (var product in Model)
             {
-                <div class="col-4">
+                <div class="col-6">
                     <div class="my-3 border">
                         <div class="card">
                             <div class="card-body">
@@ -33,7 +33,7 @@
                                 <span class="badge badge-light mb-2 align-content-center">@product.CategoryName</span>
                                 <div class="row">
                                     <div class="col">
-                                        <span class="card-text">Weight: @string.Format("{0:0.00} kg", product.Weight)</span>
+                                        <span class="card-text">Weight: @string.Format("{0:n1} kg", product.Weight)</span>
                                     </div>
                                     <div class="col  text-right">
                                         <span class="card-text">Available: @Html.Raw(product.UnitsInStock)</span>

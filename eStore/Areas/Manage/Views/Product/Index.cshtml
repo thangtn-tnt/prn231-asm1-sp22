@@ -1,61 +1,64 @@
 ﻿<br />
-<div class="container p-4 border">
-    <div class="row">
-        <div class="col text-right pb-2">
-            <a asp-controller="Product" asp-action="Create" class="btn btn-outline-primary"><i class="bi bi-plus-square-fill"></i> Create New Product</a>
-        </div>
-    </div>
-    <div class="row pb-2">
-        <div class="col">
-            <h1 class="text-primary">Product List</h1>
-        </div>
-        <div class="mx-auto col">
-            <div class="form-group has-search align-items-center">
-                <span class="fa fa-search form-control-feedback"></span>
-                <input type="text" class="form-control" placeholder="Search">
+
+<form method="get">
+    <div class="container p-4 border">
+        <div class="row">
+            <div class="col text-right pb-2">
+                <a asp-controller="Product" asp-action="Create" class="btn btn-outline-primary"><i class="bi bi-plus-square-fill"></i> Create New Product</a>
             </div>
         </div>
-    </div>
+        <div class="row pb-2">
+            <div class="col">
+                <h1 class="text-primary">Product List</h1>
+            </div>
+            <div class="mx-auto col">
+                <div class="form-group has-search align-items-center">
+                    <span class="fa fa-search form-control-feedback"></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search">
+                </div>
+            </div>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    Product
-                </th>
-                <th>
-                    Category
-                </th>
-                <th>
-                    Weight
-                </th>
-                <th>
-                    Unit Price
-                </th>
-                <th>
-                    Units In Stock
-                </th>
-                <th>
-                    Action
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>@item.ProductName</td>
-                    <td>@item.CategoryName</td>
-                    <td>@item.Weight</td>
-                    <td>@item.UnitPrice</td>
-                    <td>@item.UnitsInStock</td>
-                    <td>
-                        <a asp-controller="Product" asp-action="Update" asp-route-id="@item.ProductId" class="btn btn-success"><i class="bi bi-pencil-square"></i></a>
-                        <a asp-controller="Product" asp-action="Delete" asp-route-id="@item.ProductId" class="btn btn-danger"><i class="bi bi-trash-fill"></i></a>
-                    </td>
+                    <th>
+                        Product
+                    </th>
+                    <th>
+                        Category
+                    </th>
+                    <th>
+                        Weight
+                    </th>
+                    <th>
+                        Unit Price
+                    </th>
+                    <th>
+                        Units In Stock
+                    </th>
+                    <th>
+                        Action
+                    </th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.ProductName</td>
+                        <td>@item.CategoryName</td>
+                        <td>@item.Weight</td>
+                        <td>@item.UnitPrice</td>
+                        <td>@item.UnitsInStock</td>
+                        <td>
+                            <a asp-controller="Product" asp-action="Update" asp-route-id="@item.ProductId" class="btn btn-success"><i class="bi bi-pencil-square"></i></a>
+                            <a asp-controller="Product" asp-action="Delete" asp-route-id="@item.ProductId" class="btn btn-danger"><i class="bi bi-trash-fill"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
 
-</div>
+    </div>
+</form>

@@ -1,9 +1,13 @@
 ﻿using BusinessObject;
 using DataAccess.Dto;
+using DataAccess.DTO;
 using DataAccess.Repositories;
+using eStoreAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -13,73 +17,38 @@ namespace eStoreAPI.Controllers
     [ApiController]
     public class MemberController : ControllerBase
     {
+        private readonly APIResponse _response;
         private readonly IMemberRepository _repository = new MemberRepository();
+        public MemberController()
+        {
+            _response = new();
+        }
 
-        //GET: api/Member
         [HttpGet]
-        public ActionResult<IEnumerable<Member>> GetMembers() => _repository.GetMembers();
-
-        [HttpGet("{id}")]
-        public ActionResult<Member> FindById([FromRoute] int id) => _repository.GetMemberById(id);
-
-        [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
+        public ActionResult<APIResponse> GetMembers([FromQuery] string? search)
         {
-            var loginResponse = await _repository.Login(model);
-            if (loginResponse.Member == null || string.IsNullOrEmpty(loginResponse.Token))
+            try
             {
-                //_response.StatusCode = HttpStatusCode.BadRequest;
-                //_response.IsSuccess = false;
-                //_response.ErrorMessages.Add("Username or password is incorrect");
-                return BadRequest();
-            }            
-            return Ok(loginResponse);
-        }
+                IEnumerable<MemberDTO> memList;
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> Register([FromBody] RegisterationRequestDTO model)
-        {
-            bool isUnique = _repository.IsUniqueMember(model.Email);
-            if (!isUnique)
-            {           
-                return BadRequest("not available");
+                memList = _repository.GetMembers();
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    memList = memList.Where(u => u.Email.ToLower().Contains(search));
+                }
+
+                _response.Result = memList;
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
             }
-
-            var user = await _repository.Register(model);
-            if (user == null)
+            catch (Exception ex)
             {
-                return BadRequest("failed");
+                _response.IsSuccess = false;
+                _response.ErrorMessages
+                     = new List<string>() { ex.ToString() };
             }
-           
-            return Ok();
-        }
-
-        //POST: api/Member
-        [HttpPut]
-        public IActionResult SaveMember(Member mem)
-        {
-            if (_repository.IsUniqueMember(mem.Email))
-            {
-                return BadRequest();
-            }
-
-            _repository.SaveMember(mem);
-            return NoContent();
-        }
-
-        //GET: api/Member/5
-        [HttpDelete("id")]
-        public IActionResult DeleteMember(int id)
-        {
-            var memFromDb = _repository.GetMemberById(id);
-
-            if (memFromDb == null)
-            {
-                return NotFound();
-            }
-
-            _repository.DeleteMember(memFromDb);
-            return NoContent();
+            return _response;
         }
     }
 }

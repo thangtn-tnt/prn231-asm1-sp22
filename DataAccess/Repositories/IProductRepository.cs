@@ -12,8 +12,8 @@ namespace DataAccess.Repositories
     {
         void SaveProduct(ProductCreateDTO product);
         ProductDTO GetProductById(int id);
-        void DeleteProduct(Product product);
-        void UpdateProduct(Product product);
+        void DeleteProduct(ProductDTO product);
+        void UpdateProduct(ProductUpdateDTO product);
         List<CategoryDTO> GetCategories();
         List<ProductDTO> GetProducts();
     }

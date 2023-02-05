@@ -19,6 +19,6 @@ namespace DataAccess.Repositories
         Task<LoginResponseDTO> Login(LoginRequestDTO loginRequest);
         Task<MemberDTO> Register(RegisterationRequestDTO registerationRequest);
         Member GetMemberById(int id);
-        List<Member> GetMembers();
+        List<MemberDTO> GetMembers();
     }
 }

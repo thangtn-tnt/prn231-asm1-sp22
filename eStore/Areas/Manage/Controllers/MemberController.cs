@@ -1,5 +1,11 @@
-﻿using BusinessObject;
+﻿using AutoMapper;
+using BusinessObject;
+using eStore.Models;
+using eStore.Models.Dto;
+using eStore.Services;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -12,38 +18,25 @@ namespace eStore.Areas.Manage.Controllers
     [Area("Manage")]
     public class MemberController : Controller
     {
-        private readonly HttpClient client = null;
-        private string MemberUrlApi = string.Empty;
-        private readonly JsonSerializerOptions options;
-
-        public MemberController()
+        private readonly IMemberService _service;
+        private readonly IMapper _mapper;
+        public MemberController(IMemberService service, IMapper mapper)
         {
-            client = new HttpClient();
-            var contentType = new MediaTypeWithQualityHeaderValue("application/json");
-            client.DefaultRequestHeaders.Accept.Add(contentType);
-            MemberUrlApi = "https://localhost:44318/api/Member";
-
-            options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-            };
+            _service = service;
+            _mapper = mapper;
         }
         public async Task<IActionResult> Index()
         {
-            HttpResponseMessage response = await client.GetAsync(MemberUrlApi);
+            List<MemberDTO> listMembers = new List<MemberDTO>();
 
-            string strData = await response.Content.ReadAsStringAsync();
+            var response = await _service.GetAllAsync<APIResponse>();
 
-            List<Member> listMembers = !string.IsNullOrEmpty(strData) ? JsonSerializer.Deserialize<List<Member>>(strData, options) : null;
+            if (response != null && response.IsSuccess)
+            {
+                listMembers = JsonConvert.DeserializeObject<List<MemberDTO>>(Convert.ToString(response.Result));
+            }
 
             return View(listMembers);
-        }
-
-        public async Task<IActionResult> Add()
-        {
-            HttpResponseMessage response = await client.GetAsync(MemberUrlApi);
-
-            return View();
         }
     }
 }

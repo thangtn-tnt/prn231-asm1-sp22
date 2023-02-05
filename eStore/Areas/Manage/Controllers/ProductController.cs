@@ -14,6 +14,9 @@ using eStore.Models;
 using AutoMapper;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace eStore.Areas.Manage.Controllers
 {
@@ -28,11 +31,11 @@ namespace eStore.Areas.Manage.Controllers
             _mapper = mapper;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? search)
         {
             List<ProductDTO> listProducts = new List<ProductDTO>();
 
-            var response = await _service.GetAllAsync<APIResponse>();
+            var response = await _service.GetAllAsync<APIResponse>(search);
 
             if (response != null && response.IsSuccess)
             {
@@ -66,13 +69,79 @@ namespace eStore.Areas.Manage.Controllers
                 var response = await _service.CreateAsync<APIResponse>(productCreateDTO);
                 if (response != null && response.IsSuccess)
                 {
-                    ModelState.AddModelError("232", "Error");
                     return RedirectToAction("Index");
                 }
-
-            }            
+            }
             return RedirectToAction("Create");
         }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var response = await _service.GetAsync<APIResponse>(id);
+            if (response != null && response.IsSuccess)
+            {
+                ProductDTO model = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(response.Result));
+                return View(model);
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(ProductDTO model)
+        {
+            var response = await _service.DeleteAsync<APIResponse>(model.ProductId);
+            if (response != null && response.IsSuccess)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
+        }
+
+        public async Task<IActionResult> Update(int id)
+        {
+            List<CategoryDTO> categories = new List<CategoryDTO>();
+
+            var responseCate = await _service.GetForeignKeyList<APIResponse>();
+
+            if (responseCate != null && responseCate.IsSuccess)
+            {
+                categories = JsonConvert.DeserializeObject<List<CategoryDTO>>(Convert.ToString(responseCate.Result));
+            }
+
+
+            var response = await _service.GetAsync<APIResponse>(id);
+            if (response != null && response.IsSuccess)
+            {
+                ProductDTO tmp = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(response.Result));
+
+                ProductUpdateDTO product = _mapper.Map<ProductUpdateDTO>(tmp);
+
+                product.CategoryId = categories.SingleOrDefault(c => c.CategoryName == tmp.CategoryName).CategoryId;
+
+                ViewData["CategoryName"] = new SelectList(categories, "CategoryId", "CategoryName");
+
+                return View(product);
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Update(ProductUpdateDTO model)
+        {
+            if (ModelState.IsValid)
+            {
+                var response = await _service.UpdateAsync<APIResponse>(model);
+                if (response != null && response.IsSuccess)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            return RedirectToAction(nameof(Update));
+        }
+
+
     }
 }
 

@@ -1,5 +1,4 @@
-﻿@using BusinessObject;
-@model Product
+﻿@model ProductUpdateDTO
 
 <form asp-action="Update">
     <br />
@@ -20,11 +19,11 @@
             </div>
 
             <div class="col-2">
-                <label asp-for="Category.CategoryName" class="control-label pt-2" style="font-size:20px;"></label>
+                <label asp-for="CategoryId" class="control-label pt-2" style="font-size:20px;"></label>
             </div>
             <div class="col-10 pb-3">
-                <select asp-for="Category.CategoryName" asp-items="ViewBag.CategoryName" class="form-control"></select>
-                <span asp-validation-for="Category.CategoryName" class="text-danger"></span>
+                <select asp-for="CategoryId" asp-items="ViewBag.CategoryName" class="form-control"></select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
             </div>
 
             <div class="col-2">

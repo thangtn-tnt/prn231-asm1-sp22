@@ -36,7 +36,11 @@ namespace eStore
             services.AddAutoMapper(typeof(MappingConfig));
 
             services.AddHttpClient<IProductService, ProductService>();
-            services.AddScoped<IProductService, ProductService>();
+            //services.AddScoped<IProductService, ProductService>();
+            services.AddSingleton<IProductService, ProductService>();
+
+            services.AddHttpClient<IMemberService, MemberService>();
+            services.AddSingleton<IMemberService, MemberService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

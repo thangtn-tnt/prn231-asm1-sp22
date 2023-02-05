@@ -13,8 +13,8 @@ namespace DataAccess.Repositories
     {
         public void SaveProduct(ProductCreateDTO product) => ProductDAO.SaveProduct(product);
         public ProductDTO GetProductById(int id) => ProductDAO.FindById(id);
-        public void DeleteProduct(Product product) => ProductDAO.DeleteProduct(product);
-        public void UpdateProduct(Product product) => ProductDAO.UpdateProduct(product);
+        public void DeleteProduct(ProductDTO product) => ProductDAO.DeleteProduct(product);
+        public void UpdateProduct(ProductUpdateDTO product) => ProductDAO.UpdateProduct(product);
         public List<CategoryDTO> GetCategories() => ProductDAO.GetCategories();
         public List<ProductDTO> GetProducts() => ProductDAO.GetProducts();
     }

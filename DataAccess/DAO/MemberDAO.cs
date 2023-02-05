@@ -31,7 +31,7 @@ namespace DataAccess.DAO
                     {
                         cfg.CreateMap<Member, MemberDTO>().ReverseMap();
                         cfg.CreateMap<Member, RegisterationRequestDTO>().ReverseMap();
-                        cfg.CreateMap<MemberDTO, LoginRequestDTO>().ReverseMap();
+                        cfg.CreateMap<Member, LoginRequestDTO>().ReverseMap();
                         // Add any additional mappings here
                     });
 
@@ -41,23 +41,23 @@ namespace DataAccess.DAO
                 return _mapper;
             }
         }
-        public static List<Member> GetMembers()
+        public static List<MemberDTO> GetMembers()
         {
-            var listMembers = new List<Member>();
+            var listMembers = new List<MemberDTO>();
             try
             {
                 using (var context = new ApplicationDbContext())
                 {
-                    listMembers = context.Members.ToList();
+                    listMembers = Mapper.Map<List<MemberDTO>>(context.Members.ToList());
                 }
             }
             catch (Exception e)
             {
-
-                throw;
+                throw new Exception(e.Message);
             }
             return listMembers;
         }
+
         public static Member FindById(int memId)
         {
             Member member = new Member();
@@ -134,7 +134,7 @@ namespace DataAccess.DAO
         {
             if (FindByEmail(registerRequest.Email) == null)
             {
-                Member member = Mapper.Map<Member>(registerRequest);                
+                Member member = Mapper.Map<Member>(registerRequest);
 
                 try
                 {
@@ -156,7 +156,7 @@ namespace DataAccess.DAO
                     throw new Exception(e.Message);
                 }
             }
-            
+
             return new MemberDTO();
         }
         public static Member FindByEmail(string email)

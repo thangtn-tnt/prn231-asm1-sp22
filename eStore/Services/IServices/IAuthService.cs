@@ -1,4 +1,4 @@
-﻿namespace eStoreAPI.Services
+﻿namespace eStore.Services
 {
     public interface IAuthService
     {
