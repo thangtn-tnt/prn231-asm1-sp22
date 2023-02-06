@@ -1,4 +1,5 @@
 ﻿using BusinessObject;
+using DataAccess.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace DataAccess.Repositories
     {
         void SaveOrderDetail(OrderDetail orderDetail);
         OrderDetail GetOrderDetailById(int id);
+        List<ProductSalesDTO> GetProductSalesByMemeber(int memId);
         void DeleteOrderDetail(OrderDetail orderDetail);
         void UpdateOrderDetail(OrderDetail orderDetail);
         List<Member> GetMembers();

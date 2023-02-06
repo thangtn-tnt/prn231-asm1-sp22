@@ -1,6 +1,7 @@
 ﻿namespace eStore.Services
 {
-    public class OrderService
+    public class OrderService : IOrderService
     {
+
     }
 }

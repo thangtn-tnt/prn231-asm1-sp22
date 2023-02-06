@@ -1,0 +1,74 @@
+﻿@using System.Globalization;
+@using eStore.Models.Dto;
+@model OrderDetailDTO
+
+@{
+    var culture = CultureInfo.CreateSpecificCulture("vi-VN");
+    var customFormat = (NumberFormatInfo)culture.NumberFormat.Clone();
+    //customFormat.CurrencySymbol = "VND";
+}
+
+<h1>Place Order</h1>
+
+<form method="post" asp-action="OrderConfirmation">
+    <input hidden asp-for="ProductId" />
+    <table>
+        <tr>
+            <td>Product Name:</td>
+            <td><input disabled asp-for="ProductName" /></td>
+        </tr>
+        <tr>
+            <td>Unit Price:</td>
+            <td><input disabled asp-for="UnitPrice" value="@string.Format(customFormat, "{0:c}", Model.UnitPrice)" /></td>
+        </tr>
+        <tr>
+            <td>Units in Stock:</td>
+            <td><input disabled asp-for="UnitsInStock" /></td>
+        </tr>
+        <tr>
+            <td>Discount:</td>
+            <td><input type="text" asp-for="Discount" disabled /> %</td>
+        </tr>
+        <tr>
+            <td>Quantity:</td>
+            <td>
+                <button type="button" onclick="decrementValue()">-</button>
+                <input type="text" asp-for="Quantity" value="1" />
+                <button type="button" onclick="incrementValue()">+</button>
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" value="Place Order" /></td>
+        </tr>
+    </table>
+</form>
+
+<script>
+    function decrementValue() {
+        let quantity = document.getElementById("Quantity");
+        let value = parseInt(quantity.value, 10);
+        if (value > 1) {
+            value--;
+        }
+        quantity.value = value;
+        updateTempPrice();
+    }
+
+    function incrementValue() {
+        let quantity = document.getElementById("Quantity");
+        let value = parseInt(quantity.value, 10);
+        value++;
+        quantity.value = value;
+        updateTempPrice();
+    }
+    function updateTempPrice() {
+        let unitPrice = parseFloat(document.querySelector('input[name="UnitPrice"]').value);
+        let discount = parseFloat(document.querySelector('input[name="Discount"]').value, 10) / 100;
+        let quantity = parseFloat(document.querySelector('input[id="Quantity"]').value, 10);
+        let tempPrice = unitPrice * quantity * (1 - discount);        
+    }
+</script>
+
+
+

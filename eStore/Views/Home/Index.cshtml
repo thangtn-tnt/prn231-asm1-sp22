@@ -44,7 +44,7 @@
                                         <span style="font-size: 22px;">@string.Format(customFormat, "{0:c}", product.UnitPrice)</span>
                                     </div>
                                     <div class="col">
-                                        <a asp-controller="Order" asp-action="Index" asp-route-id="1"
+                                        <a asp-controller="Order" asp-action="Details" asp-route-id="@product.ProductId"
                                        class="btn btn-success form-control">Order</a>
                                     </div>
                                 </div>

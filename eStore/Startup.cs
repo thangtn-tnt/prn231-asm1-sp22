@@ -39,6 +39,13 @@ namespace eStore
             //services.AddScoped<IProductService, ProductService>();
             services.AddSingleton<IProductService, ProductService>();
 
+            services.AddHttpClient<IOrderDetailService, OrderDetailService>();
+            services.AddSingleton<IOrderDetailService, OrderDetailService>();
+
+            services.AddHttpClient<IOrderService, OrderService>();
+            services.AddSingleton<IOrderService, OrderService>();
+
+
             services.AddHttpClient<IMemberService, MemberService>();
             services.AddSingleton<IMemberService, MemberService>();
         }

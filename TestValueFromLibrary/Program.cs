@@ -1,4 +1,6 @@
 ﻿using DataAccess;
+using DataAccess.DAO;
+using Newtonsoft.Json;
 using System;
 
 namespace TestValueFromLibrary
@@ -7,7 +9,7 @@ namespace TestValueFromLibrary
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(SD.DefaultAccount.Password);
+            Console.WriteLine(JsonConvert.SerializeObject(OrderDetailDAO.GetProductSalesByMember(1)));
         }
     }
 }

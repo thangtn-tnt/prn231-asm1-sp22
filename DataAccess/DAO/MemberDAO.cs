@@ -31,7 +31,7 @@ namespace DataAccess.DAO
                     {
                         cfg.CreateMap<Member, MemberDTO>().ReverseMap();
                         cfg.CreateMap<Member, RegisterationRequestDTO>().ReverseMap();
-                        cfg.CreateMap<Member, LoginRequestDTO>().ReverseMap();
+                        cfg.CreateMap<MemberDTO, LoginRequestDTO>().ReverseMap();
                         cfg.CreateMap<Member, MemberUpdateDTO>().ReverseMap();
                         // Add any additional mappings here
                     });

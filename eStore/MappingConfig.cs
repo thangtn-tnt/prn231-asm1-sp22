@@ -11,6 +11,7 @@ namespace eStore
             CreateMap<Product, ProductUpdateDTO>().ReverseMap();
             CreateMap<ProductDTO, ProductUpdateDTO>().ReverseMap();
             CreateMap<Member, MemberDTO>().ReverseMap();
+            CreateMap<ProductDTO, OrderDetailDTO>().ReverseMap();
         }
     }
 }
