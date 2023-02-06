@@ -12,9 +12,9 @@ namespace BusinessObject
         [Key]
         public int OrderId { get; set; }
         public int MemberId { get; set; }
-        public DateTime OrderDate { get; set; }
-        public DateTime RequiredDate { get; set; }
-        public DateTime ShippedDate { get; set; }        
+        public DateTime OrderDate { get; set; } = DateTime.Now;
+        public DateTime RequiredDate { get; set; } = DateTime.Now.AddDays(7);
+        public Nullable<DateTime> ShippedDate { get; set; } = null;
         public Member? Member { get; set; }
     }
 }

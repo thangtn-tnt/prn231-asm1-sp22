@@ -27,6 +27,7 @@ namespace DataAccess.DAO
                         .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName)).ReverseMap();
                         cfg.CreateMap<Product, ProductCreateDTO>().ReverseMap();
                         cfg.CreateMap<Product, ProductUpdateDTO>().ReverseMap();
+                        cfg.CreateMap<ProductDTO, ProductUpdateDTO>().ReverseMap();
                         cfg.CreateMap<Category, CategoryDTO>().ReverseMap();
                         // Add any additional mappings here
                     });
@@ -101,7 +102,27 @@ namespace DataAccess.DAO
                 throw new Exception(e.Message);
             }
         }
+        public static bool CheckProductAvailable(OrderCreateDTO update)
+        {
+            try
+            {
 
+                using (var context = new ApplicationDbContext())
+                {
+                    var product = ProductDAO.FindById(update.ProductId);
+
+                    if (product != null && product.UnitsInStock >= update.Quantity)
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+            return false;
+        }
         public static ProductDTO FindByName(string name)
         {
             ProductDTO member = new ProductDTO();
@@ -119,13 +140,18 @@ namespace DataAccess.DAO
 
             return member;
         }
-
         public static void UpdateProduct(ProductUpdateDTO product)
         {
+
             try
             {
                 using (var context = new ApplicationDbContext())
-                {                    
+                {
+                    if (product.CategoryId == 0)
+                    {
+                        product.CategoryId = context.Products.AsNoTracking().SingleOrDefault(x => x.ProductId == product.ProductId).CategoryId;
+                    }
+
                     context.Update(Mapper.Map<Product>(product));
                     context.SaveChanges();
                 }
@@ -133,6 +159,16 @@ namespace DataAccess.DAO
             catch (Exception e)
             {
                 throw new Exception(e.Message);
+            }
+        }
+        public static void UpdateQuantity(OrderCreateDTO order)
+        {
+            var product = ProductDAO.FindById(order.ProductId);
+            if (product != null)
+            {
+                product.UnitsInStock -= order.Quantity;
+
+                ProductDAO.UpdateProduct(Mapper.Map<ProductUpdateDTO>(product));
             }
         }
         public static void DeleteProduct(ProductDTO product)

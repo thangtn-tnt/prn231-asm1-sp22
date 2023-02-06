@@ -2,6 +2,7 @@
 using BusinessObject;
 using DataAccess.Dto;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,7 +26,11 @@ namespace DataAccess.DAO
                         cfg.CreateMap<ProductSalesDTO, OrderDetailDAO>().ReverseMap();
                         cfg.CreateMap<ProductSalesDTO, ProductDTO>().ReverseMap();
                         cfg.CreateMap<ProductSalesDTO, OrderDTO>().ReverseMap();
-                  
+                        cfg.CreateMap<OrderDetailCreateDTO, OrderDetailDTO>().ReverseMap();
+                        cfg.CreateMap<OrderDetailCreateDTO, OrderDetail>().ReverseMap();
+                        cfg.CreateMap<OrderCreateDTO, OrderDetailCreateDTO>().ReverseMap();
+                        cfg.CreateMap<OrderDetail, OrderResponseDTO>().ReverseMap();
+
                     });
 
                     _mapper = config.CreateMapper();
@@ -71,8 +76,11 @@ namespace DataAccess.DAO
                                   CategoryName = x.product.Category.CategoryName,
                                   Quantity = x.orderDetail.Quantity,
                                   UnitPrice = x.product.UnitPrice,
-                                  Discount = x.orderDetail.Discount,                                  
-                                  TotalPrice = x.product.UnitPrice * x.orderDetail.Quantity * (1 - (x.orderDetail.Discount / 100))
+                                  Discount = x.orderDetail.Discount,
+                                  TotalPrice = x.product.UnitPrice * x.orderDetail.Quantity * (1 - (x.orderDetail.Discount / 100)),
+                                  OrderDate = x.order.OrderDate,
+                                  ShippedDate = (DateTime)x.order.ShippedDate,
+                                  RequiredDate= x.order.RequiredDate,
                               });
 
                     var result = orderHistory.Select(x => Mapper.Map<ProductSalesDTO>(x)).ToList();
@@ -101,13 +109,18 @@ namespace DataAccess.DAO
             }
             return orderDetail;
         }
-        public static void SaveOrderDetail(OrderDetail orderDetail)
+        public static void SaveOrderDetail(OrderCreateDTO orderCreate, int orderId)
         {
+
+            var orderDetailCreate = Mapper.Map<OrderDetailCreateDTO>(orderCreate);
+            orderDetailCreate.OrderId = orderId;        
+            orderDetailCreate.UnitPrice = ProductDAO.FindById(orderCreate.ProductId).UnitPrice;
+
             try
             {
                 using (var context = new ApplicationDbContext())
                 {
-                    context.OrderDetails.Add(orderDetail);
+                    context.OrderDetails.Add(Mapper.Map<OrderDetail>(orderDetailCreate));
                     context.SaveChanges();
                 }
             }
@@ -115,6 +128,42 @@ namespace DataAccess.DAO
             {
                 throw new Exception(e.Message);
             }
+        }
+
+        public static OrderResponseDTO GetOrderDetail(int orderId)
+        {
+            var orderDetail = new OrderResponseDTO();
+
+            try
+            {
+                using (var context = new ApplicationDbContext())
+                {
+                    orderDetail = context.Orders
+                        .Join(context.OrderDetails, o => o.OrderId, od => od.OrderId, (o, od) => new { o, od })
+                        .Join(context.Products, ood => ood.od.ProductId, p => p.ProductId, (ood, p) => new { ood.o, ood.od, p })
+                        .Join(context.Categories, op => op.p.CategoryId, c => c.CategoryId, (op, c) => new { op.o, op.od, op.p, c })
+                        .Join(context.Members, opc => opc.o.MemberId, s => s.MemberId, (opc, s) => new { opc.o, opc.od, opc.p, opc.c, s })
+                        .Select(opcs => new OrderResponseDTO
+                        {
+                            OrderId = opcs.o.OrderId,
+                            ProductName = opcs.p.ProductName,
+                            CategoryName = opcs.c.CategoryName,
+                            TotalPrice = opcs.od.Quantity * opcs.od.UnitPrice * (1 - opcs.od.Discount / 100),
+                            CompanyName = opcs.s.CompanyName,
+                            City = opcs.s.City,
+                            Country = opcs.s.Country,
+                            OrderDate = opcs.o.OrderDate,
+                            RequiredDate = opcs.o.RequiredDate,
+                            ShippedDate = opcs.o.ShippedDate
+                        }).Where(x => x.OrderId == orderId).SingleOrDefault();
+                }
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+            return orderDetail;
         }
         public static void UpdateOrderDetail(OrderDetail orderDetail)
         {
@@ -131,23 +180,5 @@ namespace DataAccess.DAO
                 throw new Exception(e.Message);
             }
         }
-        //public static void DeleteOrderDetail(OrderDetail orderDetail)
-        //{
-        //    try
-        //    {
-        //        using (var context = new ApplicationDbContext())
-        //        {
-        //            var prodFromDb = context.OrderDetails
-        //                .SingleOrDefault(x => x.OrderDetailId == orderDetail.OrderDetailId);
-
-        //            context.OrderDetails.Remove(prodFromDb);
-        //            context.SaveChanges();
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw new Exception(e.Message);
-        //    }
-        //}
     }
 }

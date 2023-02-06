@@ -1,4 +1,6 @@
-﻿using BusinessObject;
+﻿using AutoMapper;
+using BusinessObject;
+using DataAccess.Dto;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,6 +12,27 @@ namespace DataAccess.DAO
 {
     public class OrderDAO
     {
+        private static IMapper _mapper;
+        public static IMapper Mapper
+        {
+            get
+            {
+                if (_mapper == null)
+                {
+                    var config = new MapperConfiguration(cfg =>
+                    {
+                        cfg.CreateMap<Order, OrderCreateDTO>().ReverseMap();      
+                        cfg.CreateMap<OrderDetail, OrderResponseDTO>().ReverseMap();
+
+                    });
+
+                    _mapper = config.CreateMapper();
+                }
+
+                return _mapper;
+            }
+        }
+
         public static List<Order> GetOrders()
         {
             var listOrders = new List<Order>();
@@ -43,20 +66,29 @@ namespace DataAccess.DAO
             }
             return order;
         }
-        public static void SaveOrder(Order order)
+        public static int SaveOrder(OrderCreateDTO orderCreate)
         {
+            int orderRes;
+
             try
             {
                 using (var context = new ApplicationDbContext())
                 {
+                    var order = Mapper.Map<Order>(orderCreate);
                     context.Orders.Add(order);
                     context.SaveChanges();
+
+                    ProductDAO.UpdateQuantity(orderCreate);
+
+                    orderRes = order.OrderId;
                 }
             }
             catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
+
+            return orderRes;
         }
         public static void UpdateOrder(Order order)
         {

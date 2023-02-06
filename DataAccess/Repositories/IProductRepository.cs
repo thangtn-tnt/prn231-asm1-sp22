@@ -16,5 +16,6 @@ namespace DataAccess.Repositories
         void UpdateProduct(ProductUpdateDTO product);
         List<CategoryDTO> GetCategories();
         List<ProductDTO> GetProducts();
+        bool CheckProductAvailable(OrderCreateDTO orderCreate);
     }
 }

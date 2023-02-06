@@ -10,8 +10,8 @@ namespace DataAccess.Repositories
 {
     public interface IOrderDetailRepository
     {
-        void SaveOrderDetail(OrderDetail orderDetail);
-        OrderDetail GetOrderDetailById(int id);
+        void SaveOrderDetail(OrderCreateDTO orderCreate, int orderId);
+        OrderResponseDTO GetOrderDetailById(int id);
         List<ProductSalesDTO> GetProductSalesByMemeber(int memId);
         void DeleteOrderDetail(OrderDetail orderDetail);
         void UpdateOrderDetail(OrderDetail orderDetail);

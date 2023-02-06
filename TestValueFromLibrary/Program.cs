@@ -9,7 +9,7 @@ namespace TestValueFromLibrary
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(JsonConvert.SerializeObject(OrderDetailDAO.GetProductSalesByMember(1)));
+            Console.WriteLine(OrderDetailDAO.GetOrderDetail(3));
         }
     }
 }

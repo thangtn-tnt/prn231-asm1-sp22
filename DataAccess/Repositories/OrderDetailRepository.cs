@@ -21,10 +21,7 @@ namespace DataAccess.Repositories
             throw new NotImplementedException();
         }
 
-        public OrderDetail GetOrderDetailById(int id)
-        {
-            throw new NotImplementedException();
-        }
+        public OrderResponseDTO GetOrderDetailById(int id) => OrderDetailDAO.GetOrderDetail(id);
 
         public List<OrderDetail> GetOrders()
         {
@@ -33,10 +30,7 @@ namespace DataAccess.Repositories
 
         public List<ProductSalesDTO> GetProductSalesByMemeber(int memId) => OrderDetailDAO.GetProductSalesByMember(memId);
 
-        public void SaveOrderDetail(OrderDetail orderDetail)
-        {
-            throw new NotImplementedException();
-        }
+        public void SaveOrderDetail(OrderCreateDTO orderDetail, int orderId) => OrderDetailDAO.SaveOrderDetail(orderDetail, orderId);
 
         public void UpdateOrderDetail(OrderDetail orderDetail)
         {

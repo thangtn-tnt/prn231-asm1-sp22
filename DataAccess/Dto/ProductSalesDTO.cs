@@ -19,10 +19,8 @@ namespace DataAccess.Dto
         public int Quantity { get; set; }
         public decimal Discount { get; set; }
         public decimal TotalPrice { get; set; }
-
-        //public ProductSalesDTO()
-        //{
-        //    TotalPrice = UnitPrice * Quantity * (1 - Discount / 100);
-        //}
+        public DateTime OrderDate { get; set; }
+        public DateTime RequiredDate { get; set; }
+        public Nullable<DateTime> ShippedDate { get; set; }
     }
 }

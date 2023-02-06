@@ -40,23 +40,43 @@ namespace eStore.Controllers
                 model = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(productRes.Result));
 
                 OrderDetailDTO orderDetail = _mapper.Map<OrderDetailDTO>(model);
+
                 if (orderDetail != null)
                 {
+                    orderDetail.TempPrice = orderDetail.UnitPrice * orderDetail.Quantity * (1 - orderDetail.Discount / 100);
                     return View(orderDetail);
                 }
             }
 
             return NotFound();
         }
+
+        [HttpGet]
+        public IActionResult OrderConfirmation()
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> OrderConfirmation(OrderDetailDTO orderDetail)
         {
             if (ModelState.IsValid)
             {
-                return View();
+                var orderCreate = _mapper.Map<OrderCreateDTO>(orderDetail);
+                orderCreate.MemberId = 1;
+
+                var orderRes = await _order.CreateAsync<APIResponse>(orderCreate);
+
+                if (orderRes != null && orderRes.IsSuccess)
+                {
+                    OrderResponseDTO orderResponse = JsonConvert.DeserializeObject<OrderResponseDTO>(Convert.ToString(orderRes.Result));
+
+                    return View(orderResponse);
+                }
+                TempData["available"] = "Not available";
             }
-            return RedirectToAction(nameof(Details));
+            return RedirectToAction("Details", new { id = orderDetail.ProductId });
         }
 
         [HttpGet]

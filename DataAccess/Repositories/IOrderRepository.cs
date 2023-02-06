@@ -1,4 +1,5 @@
 ﻿using BusinessObject;
+using DataAccess.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,9 @@ namespace DataAccess.Repositories
 {
     public interface IOrderRepository
     {
-        void SaveOrder(Order order);
+        int SaveOrder(OrderCreateDTO order);
         Order GetOrderById(int id);
         void DeleteOrder(Order order);
-        void UpdateOrder(Order order);
-        List<Member> GetMembers();
-        List<Order> GetOrders();
+        void UpdateOrder(Order order);                
     }
 }
