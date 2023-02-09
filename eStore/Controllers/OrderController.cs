@@ -8,6 +8,7 @@ using eStore.Services;
 using eStore.Models;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 
 namespace eStore.Controllers
 {
@@ -32,22 +33,28 @@ namespace eStore.Controllers
         }
         public async Task<IActionResult> Details(int id)
         {
-            ProductDTO model = null;
-
-            var productRes = await _product.GetAsync<APIResponse>(id);
-            if (productRes != null && productRes.IsSuccess)
+            if (HttpContext.Session.GetInt32(SD.SessionID) > 0)
             {
-                model = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(productRes.Result));
+                ProductDTO model = null;
 
-                OrderDetailDTO orderDetail = _mapper.Map<OrderDetailDTO>(model);
-
-                if (orderDetail != null)
+                var productRes = await _product.GetAsync<APIResponse>(id);
+                if (productRes != null && productRes.IsSuccess)
                 {
-                    orderDetail.TempPrice = orderDetail.UnitPrice * orderDetail.Quantity * (1 - orderDetail.Discount / 100);
-                    return View(orderDetail);
+                    model = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(productRes.Result));
+
+                    OrderDetailDTO orderDetail = _mapper.Map<OrderDetailDTO>(model);
+
+                    if (orderDetail != null)
+                    {
+                        orderDetail.TempPrice = orderDetail.UnitPrice * orderDetail.Quantity * (1 - orderDetail.Discount / 100);
+                        return View(orderDetail);
+                    }
                 }
             }
-
+            else
+            {
+                return RedirectToAction("", "Home");
+            }
             return NotFound();
         }
 
@@ -61,20 +68,23 @@ namespace eStore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> OrderConfirmation(OrderDetailDTO orderDetail)
         {
-            if (ModelState.IsValid)
+            if (HttpContext.Session.GetInt32(SD.SessionID) > 0)
             {
-                var orderCreate = _mapper.Map<OrderCreateDTO>(orderDetail);
-                orderCreate.MemberId = 1;
-
-                var orderRes = await _order.CreateAsync<APIResponse>(orderCreate);
-
-                if (orderRes != null && orderRes.IsSuccess)
+                if (ModelState.IsValid)
                 {
-                    OrderResponseDTO orderResponse = JsonConvert.DeserializeObject<OrderResponseDTO>(Convert.ToString(orderRes.Result));
+                    var orderCreate = _mapper.Map<OrderCreateDTO>(orderDetail);
+                    orderCreate.MemberId = (int)HttpContext.Session.GetInt32(SD.SessionID);
 
-                    return View(orderResponse);
+                    var orderRes = await _order.CreateAsync<APIResponse>(orderCreate);
+
+                    if (orderRes != null && orderRes.IsSuccess)
+                    {
+                        OrderResponseDTO orderResponse = JsonConvert.DeserializeObject<OrderResponseDTO>(Convert.ToString(orderRes.Result));
+
+                        return View(orderResponse);
+                    }
+                    TempData["available"] = "Not available";
                 }
-                TempData["available"] = "Not available";
             }
             return RedirectToAction("Details", new { id = orderDetail.ProductId });
         }
@@ -82,16 +92,20 @@ namespace eStore.Controllers
         [HttpGet]
         public async Task<IActionResult> History()
         {
-            List<ProductSalesDTO> listOrders = new List<ProductSalesDTO>();
-
-            var response = await _orderDetail.GetAsync<APIResponse>(1);
-
-            if (response != null && response.IsSuccess)
+            if (HttpContext.Session.GetInt32(SD.SessionID) > 0)
             {
-                listOrders = JsonConvert.DeserializeObject<List<ProductSalesDTO>>(Convert.ToString(response.Result));
-            }
+                List<ProductSalesDTO> listOrders = new List<ProductSalesDTO>();
 
-            return View(listOrders);
+                var response = await _orderDetail.GetAsync<APIResponse>((int)HttpContext.Session.GetInt32(SD.SessionID));
+
+                if (response != null && response.IsSuccess)
+                {
+                    listOrders = JsonConvert.DeserializeObject<List<ProductSalesDTO>>(Convert.ToString(response.Result));
+                }
+
+                return View(listOrders);
+            }
+            return RedirectToAction("", "Home");
 
         }
     }

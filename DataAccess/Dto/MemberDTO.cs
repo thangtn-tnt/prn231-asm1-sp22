@@ -9,7 +9,7 @@ namespace DataAccess.DTO
 {
     public class MemberDTO
     {
-        public string MemberId { get; set; }
+        public int MemberId { get; set; }
         [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
         public string CompanyName { get; set; }

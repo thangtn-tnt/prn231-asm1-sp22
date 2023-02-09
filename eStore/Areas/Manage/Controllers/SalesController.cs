@@ -5,61 +5,43 @@ using System;
 using eStore.Models.Dto;
 using eStore.Services;
 using System.Globalization;
+using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
+using eStore.Models;
+using Newtonsoft.Json;
+using System.Threading.Tasks;
 
-namespace eStore.Areas.Admin.Controllers    
+namespace eStore.Areas.Admin.Controllers
 {
     [Area("Manage")]
     public class SalesController : Controller
-    {        
-        public SalesController()
+    {
+        private readonly IOrderDetailService _service;
+        public SalesController(IOrderDetailService service)
         {
-     
+            _service = service;
         }
-        public IActionResult Index()
+        public async Task<ActionResult> Index(string? startDate, string? endDate)
         {
-            return View();
-        }
-        public List<ProductSalesDTO> Generate(DateTime startDate, DateTime endDate)
-        {
-            //var orderDetails = _service.OrderDetails
-            //    .Where(od => od.Order.OrderDate >= startDate && od.Order.OrderDate <= endDate)
-            //    .ToList();
+            //SaleModel input = new SaleModel();
+            if (HttpContext.Session.GetString(SD.SessionRole) == "Admin")
+            {
+                var sales = new List<ProductSalesDTO>();
+                if (!string.IsNullOrEmpty(startDate) && !string.IsNullOrEmpty(endDate))
+                {
+                    if (startDate.CompareTo(endDate) < 0)
+                    {
+                        var response = await _service.GetAllAsync<APIResponse>(startDate, endDate);
+                        if (response != null && response.IsSuccess)
+                        {
+                            sales = JsonConvert.DeserializeObject<List<ProductSalesDTO>>(Convert.ToString(response.Result));
+                        }
+                    }
+                }
+                return View(sales);
+            }
 
-            //var salesStatistics = orderDetails
-            //    .GroupBy(od => od.Product.ProductName)
-            //    .Select(group => new SalesStatistics
-            //    {
-            //        ProductName = group.Key,
-            //        TotalSales = group.Sum(od => od.UnitPrice * od.Quantity * (1 - od.Discount))
-            //    })
-            //    .OrderByDescending(s => s.TotalSales)
-            //    .ToList();
-
-            var salesStatistics = new List<ProductSalesDTO>();  
-
-            return salesStatistics;
-        }
-
-        public IActionResult SalesReport(string startDate, string endDate)
-        {
-            DateTime parsedStartDate = DateTime.ParseExact(startDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
-            DateTime parsedEndDate = DateTime.ParseExact(endDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
-
-            //var sales = _dbContext.Orders
-            //    .Where(o => o.OrderDate >= parsedStartDate && o.OrderDate <= parsedEndDate)
-            //    .Join(_dbContext.OrderDetails, o => o.OrderId, od => od.OrderId, (o, od) => new { Order = o, OrderDetail = od })
-            //    .Join(_dbContext.Products, od => od.OrderDetail.ProductId, p => p.ProductId, (od, p) => new { OrderDetail = od.OrderDetail, Product = p })
-            //    .GroupBy(result => result.Product.ProductId)
-            //    .Select(g => new
-            //    {            
-            //        ProductName = g.First().Product.ProductName,
-            //        TotalSales = g.Sum(x => x.OrderDetail.UnitPrice * x.OrderDetail.Quantity * (1 - x.OrderDetail.Discount))
-            //        TotalProductsSold = g.Sum(od => od.Quantity)
-            //    })
-            //    .OrderByDescending(s => s.TotalSales)
-            //    .ToList();
-            
-            return View(parsedEndDate);
+            return Redirect("/");
         }
     }
 }

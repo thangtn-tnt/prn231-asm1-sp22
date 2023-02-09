@@ -3,6 +3,7 @@ using BusinessObject;
 using eStore.Models;
 using eStore.Models.Dto;
 using eStore.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
@@ -29,21 +30,29 @@ namespace eStore.Areas.Manage.Controllers
         }
         public async Task<IActionResult> Index(string? search)
         {
-            List<MemberDTO> listMembers = new List<MemberDTO>();
-
-            var response = await _service.GetAllAsync<APIResponse>(search);
-
-            if (response != null && response.IsSuccess)
+            if (HttpContext.Session.GetString(SD.SessionRole) == "Admin")
             {
-                listMembers = JsonConvert.DeserializeObject<List<MemberDTO>>(Convert.ToString(response.Result));
-            }
+                List<MemberDTO> listMembers = new List<MemberDTO>();
 
-            return View(listMembers);
+                var response = await _service.GetAllAsync<APIResponse>(search);
+
+                if (response != null && response.IsSuccess)
+                {
+                    listMembers = JsonConvert.DeserializeObject<List<MemberDTO>>(Convert.ToString(response.Result));
+                }
+
+                return View(listMembers);
+            }
+            return Redirect("/");
         }
         [HttpGet]
-        public async Task<ActionResult> Add()
+        public ActionResult Add()
         {
-            return View();
+            if (HttpContext.Session.GetString(SD.SessionRole) == "Admin")
+            {
+                return View();
+            }
+            return Redirect("/");
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -62,13 +71,17 @@ namespace eStore.Areas.Manage.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var response = await _service.GetAsync<APIResponse>(id);
-            if (response != null && response.IsSuccess)
+            if (HttpContext.Session.GetString(SD.SessionRole) == "Admin")
             {
-                MemberDTO model = JsonConvert.DeserializeObject<MemberDTO>(Convert.ToString(response.Result));
-                return View(model);
+                var response = await _service.GetAsync<APIResponse>(id);
+                if (response != null && response.IsSuccess)
+                {
+                    MemberDTO model = JsonConvert.DeserializeObject<MemberDTO>(Convert.ToString(response.Result));
+                    return View(model);
+                }
+                return NotFound();
             }
-            return NotFound();
+            return Redirect("/");
         }
 
         [HttpPost]
@@ -85,14 +98,18 @@ namespace eStore.Areas.Manage.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var response = await _service.GetAsync<APIResponse>(id);
-            if (response != null && response.IsSuccess)
+            if (HttpContext.Session.GetString(SD.SessionRole) == "Admin")
             {
-                MemberEditDTO mem = JsonConvert.DeserializeObject<MemberEditDTO>(Convert.ToString(response.Result));
+                var response = await _service.GetAsync<APIResponse>(id);
+                if (response != null && response.IsSuccess)
+                {
+                    MemberEditDTO mem = JsonConvert.DeserializeObject<MemberEditDTO>(Convert.ToString(response.Result));
 
-                return View(mem);
+                    return View(mem);
+                }
+                return NotFound();
             }
-            return NotFound();
+            return Redirect("/");
         }
 
         [HttpPost]

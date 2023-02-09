@@ -1,6 +1,9 @@
 using eStore.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +28,7 @@ namespace eStore
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            
+
             services.AddSession(o =>
             {
                 o.IdleTimeout = TimeSpan.FromMinutes(100);
@@ -34,6 +37,8 @@ namespace eStore
             });
 
             services.AddAutoMapper(typeof(MappingConfig));
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddHttpClient<IProductService, ProductService>();
             //services.AddScoped<IProductService, ProductService>();
@@ -45,9 +50,11 @@ namespace eStore
             services.AddHttpClient<IOrderService, OrderService>();
             services.AddSingleton<IOrderService, OrderService>();
 
-
             services.AddHttpClient<IMemberService, MemberService>();
             services.AddSingleton<IMemberService, MemberService>();
+
+            services.AddHttpClient<IAuthService, AuthService>();
+            services.AddSingleton<IAuthService, AuthService>();            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,6 +75,7 @@ namespace eStore
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseSession();

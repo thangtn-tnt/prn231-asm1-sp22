@@ -9,6 +9,8 @@
             PUT,
             DELETE
         }
-        public static string SessionToken = "JWTToken";
+        public static string SessionEmail = "EmailSession";
+        public static string SessionRole = "RoleSession";
+        public static string SessionID = "IDSession";
     }
 }

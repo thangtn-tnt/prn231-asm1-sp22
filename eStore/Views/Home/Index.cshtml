@@ -1,4 +1,5 @@
 ﻿@using System.Globalization;
+@using Microsoft.AspNetCore.Http;
 @{
     ViewData["Title"] = "Home Page";
 }
@@ -43,10 +44,13 @@
                                     <div class="col pt-1">
                                         <span style="font-size: 22px;">@string.Format(customFormat, "{0:c}", product.UnitPrice)</span>
                                     </div>
-                                    <div class="col">
-                                        <a asp-controller="Order" asp-action="Details" asp-route-id="@product.ProductId"
+                                    @if (Context.Session.GetString(SD.SessionRole) != "Admin" && !string.IsNullOrEmpty(Context.Session.GetString(SD.SessionEmail)))
+                                    {
+                                        <div class="col">
+                                            <a asp-controller="Order" asp-action="Details" asp-route-id="@product.ProductId"
                                        class="btn btn-success form-control">Order</a>
-                                    </div>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         </div>

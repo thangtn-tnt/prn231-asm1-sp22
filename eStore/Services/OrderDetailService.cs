@@ -43,6 +43,15 @@ namespace eStore.Services
             });
         }
 
+        public Task<T> GetAllAsync<T>(string startDate, string endDate)
+        {
+            return SendAsync<T>(new APIRequest()
+            {
+                APIType = SD.APIType.GET,
+                Url = orderDetailUrl + "?startDate=" + startDate + "&endDate=" + endDate,
+            });
+        }
+
         public Task<T> GetAsync<T>(int memberId)
         {
             return SendAsync<T>(new APIRequest()

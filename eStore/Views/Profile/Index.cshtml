@@ -1,0 +1,76 @@
+﻿@using Microsoft.AspNetCore.Http;
+@using eStore.Models.Dto
+@model MemberEditDTO
+
+@if (Context.Session.GetString(SD.SessionRole) == "Admin")
+{
+    <h1 class="text-primary">Your account is admin, so you dont need to change your information</h1>
+}
+else
+{
+    <form method="post">
+        <br />
+        <div class="container border p-3">
+            <h1 class="text-primary">Change your information</h1>
+            <hr />
+            <h4>If you dont change password, make it as empty!</h4>
+            <div class="text-success">@TempData["success"]</div>
+            <hr />
+
+            <input hidden asp-for="MemberId" />
+            <div class="row">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="col-2">
+                    <label asp-for="Email" class="control-label pt-2" style="font-size:20px;"></label>
+                </div>
+                <div class="col-10 pb-3">
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="col-2">
+                    <label asp-for="CompanyName" class="control-label pt-2" style="font-size:20px;"></label>
+                </div>
+                <div class="col-10 pb-3">
+                    <input asp-for="CompanyName" class="form-control" />
+                    <span asp-validation-for="CompanyName" class="text-danger"></span>
+                </div>
+
+                <div class="col-2">
+                    <label asp-for="City" class="control-label pt-2" style="font-size:20px;"></label>
+                </div>
+                <div class="col-10 pb-3">
+                    <input asp-for="City" class="form-control" />
+                    <span asp-validation-for="City" class="text-danger"></span>
+                </div>
+
+                <div class="col-2">
+                    <label asp-for="Country" class="control-label pt-2" style="font-size:20px;"></label>
+                </div>
+                <div class="col-10 pb-3">
+                    <input asp-for="Country" class="form-control" />
+                    <span asp-validation-for="Country" class="text-danger"></span>
+                </div>
+
+                <div class="col-2">
+                    <label asp-for="Password" class="control-label pt-2" style="font-size:20px;"></label>
+                </div>
+                <div class="col-10 pb-3">
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="col-5 offset-2">
+                    <a asp-action="Index" asp-controller="Member" class="btn-primary btn form-control ">Back to List</a>
+                </div>
+                <div class="col-5">
+                    <input type="submit" value="Edit" class="btn btn-success form-control" />
+                </div>
+            </div>
+        </div>
+    </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

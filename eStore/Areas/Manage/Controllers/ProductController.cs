@@ -33,32 +33,40 @@ namespace eStore.Areas.Manage.Controllers
 
         public async Task<IActionResult> Index(string? search)
         {
-            List<ProductDTO> listProducts = new List<ProductDTO>();
-
-            var response = await _service.GetAllAsync<APIResponse>(search);
-
-            if (response != null && response.IsSuccess)
+            if (HttpContext.Session.GetString(SD.SessionRole) == "Admin")
             {
-                listProducts = JsonConvert.DeserializeObject<List<ProductDTO>>(Convert.ToString(response.Result));
-            }
+                List<ProductDTO> listProducts = new List<ProductDTO>();
 
-            return View(listProducts);
+                var response = await _service.GetAllAsync<APIResponse>(search);
+
+                if (response != null && response.IsSuccess)
+                {
+                    listProducts = JsonConvert.DeserializeObject<List<ProductDTO>>(Convert.ToString(response.Result));
+                }
+
+                return View(listProducts);
+            }
+            return Redirect("/");
         }
 
         [HttpGet]
         public async Task<ActionResult> Create()
         {
-            List<CategoryDTO> categories = new List<CategoryDTO>();
-
-            var response = await _service.GetForeignKeyList<APIResponse>();
-
-            if (response != null && response.IsSuccess)
+            if (HttpContext.Session.GetString(SD.SessionRole) == "Admin")
             {
-                categories = JsonConvert.DeserializeObject<List<CategoryDTO>>(Convert.ToString(response.Result));
-            }
+                List<CategoryDTO> categories = new List<CategoryDTO>();
 
-            ViewData["CategoryName"] = new SelectList(categories, "CategoryId", "CategoryName");
-            return View();
+                var response = await _service.GetForeignKeyList<APIResponse>();
+
+                if (response != null && response.IsSuccess)
+                {
+                    categories = JsonConvert.DeserializeObject<List<CategoryDTO>>(Convert.ToString(response.Result));
+                }
+
+                ViewData["CategoryName"] = new SelectList(categories, "CategoryId", "CategoryName");
+                return View();
+            }
+            return Redirect("/");
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -77,13 +85,17 @@ namespace eStore.Areas.Manage.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var response = await _service.GetAsync<APIResponse>(id);
-            if (response != null && response.IsSuccess)
+            if (HttpContext.Session.GetString(SD.SessionRole) == "Admin")
             {
-                ProductDTO model = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(response.Result));
-                return View(model);
+                var response = await _service.GetAsync<APIResponse>(id);
+                if (response != null && response.IsSuccess)
+                {
+                    ProductDTO model = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(response.Result));
+                    return View(model);
+                }
+                return NotFound();
             }
-            return NotFound();
+            return Redirect("/");
         }
 
         [HttpPost]
@@ -100,30 +112,34 @@ namespace eStore.Areas.Manage.Controllers
 
         public async Task<IActionResult> Update(int id)
         {
-            List<CategoryDTO> categories = new List<CategoryDTO>();
-
-            var responseCate = await _service.GetForeignKeyList<APIResponse>();
-
-            if (responseCate != null && responseCate.IsSuccess)
+            if (HttpContext.Session.GetString(SD.SessionRole) == "Admin")
             {
-                categories = JsonConvert.DeserializeObject<List<CategoryDTO>>(Convert.ToString(responseCate.Result));
+                List<CategoryDTO> categories = new List<CategoryDTO>();
+
+                var responseCate = await _service.GetForeignKeyList<APIResponse>();
+
+                if (responseCate != null && responseCate.IsSuccess)
+                {
+                    categories = JsonConvert.DeserializeObject<List<CategoryDTO>>(Convert.ToString(responseCate.Result));
+                }
+
+
+                var response = await _service.GetAsync<APIResponse>(id);
+                if (response != null && response.IsSuccess)
+                {
+                    ProductDTO tmp = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(response.Result));
+
+                    ProductUpdateDTO product = _mapper.Map<ProductUpdateDTO>(tmp);
+
+                    product.CategoryId = categories.SingleOrDefault(c => c.CategoryName == tmp.CategoryName).CategoryId;
+
+                    ViewData["CategoryName"] = new SelectList(categories, "CategoryId", "CategoryName");
+
+                    return View(product);
+                }             
+                return NotFound();
             }
-
-
-            var response = await _service.GetAsync<APIResponse>(id);
-            if (response != null && response.IsSuccess)
-            {
-                ProductDTO tmp = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(response.Result));
-
-                ProductUpdateDTO product = _mapper.Map<ProductUpdateDTO>(tmp);
-
-                product.CategoryId = categories.SingleOrDefault(c => c.CategoryName == tmp.CategoryName).CategoryId;
-
-                ViewData["CategoryName"] = new SelectList(categories, "CategoryId", "CategoryName");
-
-                return View(product);
-            }
-            return NotFound();
+            return Redirect("/");
         }
 
         [HttpPost]

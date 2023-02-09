@@ -93,6 +93,45 @@ namespace DataAccess.DAO
             }
             return listSales;
         }
+
+        public static List<ProductSalesDTO> GetProductSales (string startDate, string endDate)
+        {
+            var listSales = new List<ProductSalesDTO>();
+
+            try
+            {
+                using (var context = new ApplicationDbContext())
+                {
+                    var orderHistory = context.Orders
+                              .Join(context.OrderDetails, order => order.OrderId, orderDetail => orderDetail.OrderId, (order, orderDetail) => new { order, orderDetail })
+                              .Join(context.Products.Include("Category"), x => x.orderDetail.ProductId, product => product.ProductId, (x, product) => new { x.order, x.orderDetail, product })
+                              .Where(x => x.order.OrderDate >= DateTime.Parse(startDate) && x.order.OrderDate <= DateTime.Parse(endDate)).
+                              OrderByDescending(x => x.order.OrderDate).ThenByDescending(x => x.product.UnitPrice * x.orderDetail.Quantity * (1 - (x.orderDetail.Discount / 100)))
+                              .Select(x => new ProductSalesDTO
+                              {
+                                  OrderId = x.order.OrderId,
+                                  ProductId = x.product.ProductId,
+                                  ProductName = x.product.ProductName,
+                                  CategoryName = x.product.Category.CategoryName,
+                                  Quantity = x.orderDetail.Quantity,
+                                  UnitPrice = x.product.UnitPrice,
+                                  Discount = x.orderDetail.Discount,
+                                  TotalPrice = x.product.UnitPrice * x.orderDetail.Quantity * (1 - (x.orderDetail.Discount / 100)),
+                                  OrderDate = x.order.OrderDate,
+                                  ShippedDate = (DateTime)x.order.ShippedDate,
+                                  RequiredDate = x.order.RequiredDate,
+                              });
+
+                    var result = orderHistory.Select(x => Mapper.Map<ProductSalesDTO>(x)).ToList();
+                    listSales = Mapper.Map<List<ProductSalesDTO>>(result);
+                }
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+            return listSales;
+        }
         public static OrderDetail FindById(int prodId)
         {
             OrderDetail orderDetail = new OrderDetail();

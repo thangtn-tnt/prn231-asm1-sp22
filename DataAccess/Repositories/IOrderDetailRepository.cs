@@ -13,6 +13,7 @@ namespace DataAccess.Repositories
         void SaveOrderDetail(OrderCreateDTO orderCreate, int orderId);
         OrderResponseDTO GetOrderDetailById(int id);
         List<ProductSalesDTO> GetProductSalesByMemeber(int memId);
+        List<ProductSalesDTO> GetProductSales(string startDate, string endDate);
         void DeleteOrderDetail(OrderDetail orderDetail);
         void UpdateOrderDetail(OrderDetail orderDetail);
         List<Member> GetMembers();

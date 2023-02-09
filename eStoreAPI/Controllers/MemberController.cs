@@ -28,14 +28,17 @@ namespace eStoreAPI.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
         {
             var loginResponse = await _repository.Login(model);
-            if (loginResponse.Member == null || string.IsNullOrEmpty(loginResponse.Token))
+            if (loginResponse.Member == null)
             {
                 _response.StatusCode = HttpStatusCode.BadRequest;
                 _response.IsSuccess = false;
                 _response.ErrorMessages.Add("Username or password is incorrect");
-                return BadRequest();
+                return BadRequest(_response);
             }
-            return Ok(loginResponse);
+            _response.StatusCode = HttpStatusCode.OK;
+            _response.IsSuccess = true;
+            _response.Result = loginResponse;
+            return Ok(_response);
         }
 
         [HttpPost("Register")]

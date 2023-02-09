@@ -29,6 +29,7 @@ namespace DataAccess.Repositories
         }
 
         public List<ProductSalesDTO> GetProductSalesByMemeber(int memId) => OrderDetailDAO.GetProductSalesByMember(memId);
+        public List<ProductSalesDTO> GetProductSales(string startDate, string endDate) => OrderDetailDAO.GetProductSales(startDate, endDate);
 
         public void SaveOrderDetail(OrderCreateDTO orderDetail, int orderId) => OrderDetailDAO.SaveOrderDetail(orderDetail, orderId);
 

@@ -81,31 +81,18 @@ namespace DataAccess.DAO
             {
                 return new LoginResponseDTO()
                 {
-                    Token = "",
+                    Email = "",
+                    Role = "",
                     Member = null
                 };
             }
             else
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(SD.SecretKey);
-
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new System.Security.Claims.ClaimsIdentity(new Claim[]
-                    {
-                        new Claim(ClaimTypes.Email, loginRequest.Email.ToString())
-                    }),
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                };
-
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-
                 return new LoginResponseDTO()
                 {
-                    Token = tokenHandler.WriteToken(token),
-                    Member = Mapper.Map<MemberDTO>(loginRequest)
+                    Email = loginRequest.Email,
+                    Role = IsAdmin(loginRequest) ? "Admin": "Member",
+                    Member = Mapper.Map<MemberDTO>(MemberDAO.FindByEmail(loginRequest.Email))
                 };
             }
         }

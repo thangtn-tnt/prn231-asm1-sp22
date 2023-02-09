@@ -9,11 +9,16 @@ namespace eStore.Models.Dto
 {
     public class RegisterationRequestDTO
     {
+        [Required]
         [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
+        [Required]
         public string CompanyName { get; set; }
+        [Required]
         public string City { get; set; }
+        [Required]
         public string Country { get; set; }
+        [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; }
     }

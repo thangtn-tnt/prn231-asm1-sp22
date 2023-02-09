@@ -10,6 +10,7 @@ namespace eStore.Models.Dto
     public class LoginResponseDTO
     {
         public MemberDTO Member { get; set; }
-        public string Token { get; set; }
+        public string Email { get; set; }
+        public string Role { get; set; }
     }
 }

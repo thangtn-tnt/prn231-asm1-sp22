@@ -48,5 +48,35 @@ namespace eStoreAPI.Controllers
             }
             return _response;
         }
+
+        [HttpGet]
+        public ActionResult<APIResponse> GetProductSales(string startDate, string endDate)
+        {
+
+            try
+            {
+                if (DateTime.Parse(startDate) > DateTime.Parse(endDate))
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.IsSuccess = false;
+                    _response.ErrorMessages.Add("Start date must be less than end date");
+                    return BadRequest(_response);
+                }
+                IEnumerable<ProductSalesDTO> productList;
+
+                productList = _repository.GetProductSales(startDate, endDate);
+
+                _response.Result = productList;
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorMessages
+                     = new List<string>() { ex.ToString() };
+            }
+            return _response;
+        }
     }
 }
